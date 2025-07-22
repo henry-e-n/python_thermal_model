@@ -12,5 +12,4 @@ def init_gui():
 
     # Run the Streamlit app
     print("Starting the Streamlit GUI...")
-    os.system(f"streamlit run {gui_path} &")
-    return "GUI initialized successfully."
+    os.system(f"streamlit run {gui_path}")
