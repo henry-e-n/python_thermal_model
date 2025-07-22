@@ -24,9 +24,9 @@ file_path = os.path.dirname(abspath)
 
 def default_page_load():
     st.set_page_config("Interactive Thermal Model GUI", page_icon=":thermometer:", layout="wide")
-    HORIZONTAL_RED = f"{file_path}{os.sep}static{os.sep}blast-logo.png"
-    ICON_RED = f"{file_path}{os.sep}static{os.sep}blast-logo.png"
-    st.logo(HORIZONTAL_RED, icon_image=ICON_RED)
+    # HORIZONTAL_RED = f"{file_path}{os.sep}static{os.sep}blast-logo.png"
+    # ICON_RED = f"{file_path}{os.sep}static{os.sep}blast-logo.png"
+    # st.logo(HORIZONTAL_RED, icon_image=ICON_RED)
     
 default_page_load()
 
@@ -71,7 +71,7 @@ with open(f"{file_path}{os.sep}static{os.sep}styles.css") as f:
 # Streamlit app
 title_area, logo_area = st.columns(2)
 title_area.title("Interactive Thermal Model GUI")
-logo_area.image(f"{file_path}{os.sep}static{os.sep}blast-logo.png", width=200)  # Display the logo in the main body
+# logo_area.image(f"{file_path}{os.sep}static{os.sep}blast-logo.png", width=200)  # Display the logo in the main body
 
 tabs = st.tabs(["Component Modeling", "Result Tables", "Plots"])
 
