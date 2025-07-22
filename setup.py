@@ -7,11 +7,11 @@ from subprocess import check_call
 
 HERE         = pathlib.Path(__file__).parent
 PACKAGE_NAME = 'thermal_model'
-VERSION      = '0.0.35'
+VERSION      = '0.0.1'
 AUTHOR       = 'Henry Nachman'
 AUTHOR_EMAIL = 'hen367@my.utexas.edu'
 URL          = 'https://github.com/henry-e-n/Balloon_Modeling_Tools'
-DESCRIPTION  ='Python package for modeling and simulation of balloon-borne telescopes'
+DESCRIPTION  ='Python package for modeling the thermal properties of cryogenic systems.'
 LICENSE ='Apache-2.0'
 LONG_DESCRIPTION = (HERE/"README.md").read_text()
 LONG_DESC_TYPE   = 'text/markdown'
@@ -26,7 +26,6 @@ INSTALL_REQUIRES =['numpy',
 					'dill',
                     'plotly',
 					'tqdm',
-					'h5py',
 					'scipy'
 					]
 
