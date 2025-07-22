@@ -399,6 +399,8 @@ with tabs[0]:
                                 for prop, value in component.properties.items():
                                     if isinstance(value, (float, int)):
                                         new_value = st.number_input(prop, value=float(value) if isinstance(value, float) else int(value))
+                                    elif isinstance(value, bool):
+                                        new_value = st.checkbox(prop, value=value)
                                     else:
                                         new_value = st.text_input(prop, value)
                                     component.properties[prop] = new_value
