@@ -88,5 +88,6 @@ setup(
 	packages=find_packages(),
 	package_data={
 		'thermal_model': ['*.json', '*.txt', '*.csv', '*.png', '*.css', '*.html'],
+		'thermal_model.static': ['*.png', '*.css', '*.html'],
 		},
 	include_package_data=True)	
