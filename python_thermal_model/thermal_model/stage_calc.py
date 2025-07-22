@@ -6,17 +6,7 @@ import numpy as np
 import sys, os, csv, json
 import matplotlib.pyplot as plt
 
-abspath = os.path.abspath(__file__)
-file_path = os.path.dirname(abspath)
-package_path = os.path.dirname(file_path)
-# cmr_path = os.path.join(package_path, "Cryogenic_Material_Properties")
-cmr_path = f"C:{os.sep}Users{os.sep}hen367{os.sep}OneDrive - The University of Texas at Austin{os.sep}01_RESEARCH{os.sep}05_CMBS4{os.sep}Cryogenic_Material_Properties" # os.path.join(package_path, "Cryogenic_Material_Properties")
-
-if not os.path.exists(cmr_path):
-    print("ERROR : path to cryogenics materials properties repository is not found. Please set at line 12 of stage_calc.py")
-    print("Exiting...")
-    sys.exit(1)
-    exit()
+from global_var import cmr_path, path_to_mat_lib
 
 for path in [cmr_path]:
     if path not in sys.path:
@@ -27,9 +17,7 @@ from thermal_conductivity.tc_utils import *
 from thermal_conductivity.fit_types import *
 
 def calculate_power_function(details, stage_temps, A_L = False):
-    print("CALC POWER FUNCTION")
     lowT, highT = stage_temps["lowT"], stage_temps["highT"]
-    # print("Calculate Power Function for details:", details, "with stage temps:", stage_temps, "lowT:", lowT, "highT:", highT)
     mat = details["Material"]
     if not A_L:
         OD, ID = float(details["OD (m)"]), float(details["ID (m)"])
@@ -38,7 +26,17 @@ def calculate_power_function(details, stage_temps, A_L = False):
         A_L_val = area/length
     else:
         A_L_val = details["A/L (m)"]
-    ConIntQuad = get_conductivity_integral(lowT, highT, mat, specify_fit=details["Fit Choice"], verbose=False)
+
+    if "Interpolate" in details and details["Interpolate"]:
+        interp_exists, valid_range = find_interpolation(mat) # Check if interpolation file exists
+        if lowT < valid_range[0] or highT > valid_range[1]:
+            print(f"ERROR: Interpolation range for {mat} is {valid_range}, but requested range is {lowT} to {highT}.")
+            print("Using default material fit instead.")
+            ConIntQuad = get_conductivity_integral(lowT, highT, mat, verbose=False)
+        else:
+            ConIntQuad = get_interpolation_integral(lowT, highT, mat)
+    else:
+        ConIntQuad = get_conductivity_integral(lowT, highT, mat, specify_fit=details["Fit Choice"], verbose=False)
     
     ppu = A_L_val*ConIntQuad
 
@@ -69,13 +67,13 @@ def get_all_powers(components, stage_details):
 def calculate_coax_power(details, stage_temp):
     # Implement the power calculation logic for Coax components here
     # Example placeholder logic:
-    case_details = {"Material" : details["Casing Material"], "OD (m)" : details["Case OD (m)"], "ID (m)" : details["Insulator OD (m)"], "Length (m)" : details["Length (m)"], "Fit Choice": details["Casing Fit Choice"]}
+    case_details = {"Material" : details["Casing Material"], "OD (m)" : details["Case OD (m)"], "ID (m)" : details["Insulator OD (m)"], "Length (m)" : details["Length (m)"], "Fit Choice": details["Casing Fit Choice"], "Interpolate": details["Casing Interpolate"]}
     case_ppp = calculate_power_function(case_details, stage_temp)
 
-    insulator_details = {"Material" : details["Insulator Material"], "OD (m)" : details["Insulator OD (m)"], "ID (m)" : details["Core OD (m)"], "Length (m)" : details["Length (m)"], "Fit Choice": details["Insulator Fit Choice"]}
+    insulator_details = {"Material" : details["Insulator Material"], "OD (m)" : details["Insulator OD (m)"], "ID (m)" : details["Core OD (m)"], "Length (m)" : details["Length (m)"], "Fit Choice": details["Insulator Fit Choice"], "Interpolate": details["Insulator Interpolate"]}
     insulator_ppp = calculate_power_function(insulator_details, stage_temp)
 
-    core_details = {"Material" : details["Core Material"], "OD (m)" : details["Core OD (m)"], "ID (m)" : 0, "Length (m)" : details["Length (m)"], "Fit Choice": details["Core Fit Choice"]}
+    core_details = {"Material" : details["Core Material"], "OD (m)" : details["Core OD (m)"], "ID (m)" : 0, "Length (m)" : details["Length (m)"], "Fit Choice": details["Core Fit Choice"], "Interpolate": details["Core Interpolate"]}
     core_ppp = calculate_power_function(core_details, stage_temp)
 
     power_per_part = case_ppp + insulator_ppp + core_ppp
@@ -249,34 +247,49 @@ def plot_integral(selected_component, stage):
     Returns:
     fig, ax : The figure and axis objects for the plot.
     """
+
     all_files       = os.listdir(cmr_path)
-    exist_files     = [file for file in all_files if file.startswith("tc_fullrepo")]
-    tc_file_date    = exist_files[0][-12:-4]
-
-    material_of_interest = selected_component.properties["Material"]
-    print(material_of_interest)
-    TCdata = np.loadtxt(os.path.join(cmr_path, "thermal_conductivity", "lib", material_of_interest, "all_fits.csv"), dtype=str, delimiter=',') # imports compilation file csv
-    print(TCdata)
-    mat_parameters = get_parameters(TCdata, selected_component.properties["Fit Choice"])
-    func_type = get_func_type(mat_parameters["fit_type"])
-    print(func_type)
-    fit_range = mat_parameters["fit_range"]
-
-    # Let's make our plotting range the listed fit range
-    T_range = np.linspace(fit_range[0], fit_range[1], 1000)
-
-    # Now let's use the fit to get the thermal conductivity values over the range
-    # Luckily, every function type is defined in such a way to readily accept the parameter dictionary as it was defined above
-    y_vals = func_type(T_range, mat_parameters)
     T_low, T_high = [stage.low_temp, stage.high_temp]
-
     # Plotting
     fill_between_range = np.arange(T_low, T_high)
+    
     fig, ax = plt.subplots()
-    ax.plot(T_range, y_vals, color="b")
-    ax.fill_between(fill_between_range, np.zeros(len(fill_between_range)), func_type(fill_between_range, mat_parameters),
+
+    if not selected_component.properties["Interpolate"]:
+        exist_files     = [file for file in all_files if file.startswith("tc_fullrepo")]
+        tc_file_date    = exist_files[0][-12:-4]
+
+        material_of_interest = selected_component.properties["Material"]
+        print(material_of_interest)
+        TCdata = np.loadtxt(os.path.join(cmr_path, "thermal_conductivity", "lib", material_of_interest, "all_fits.csv"), dtype=str, delimiter=',') # imports compilation file csv
+        print(TCdata)
+        mat_parameters = get_parameters(TCdata, selected_component.properties["Fit Choice"])
+        func_type = get_func_type(mat_parameters["fit_type"])
+        print(func_type)
+        fit_range = mat_parameters["fit_range"]
+
+        # Let's make our plotting range the listed fit range
+        T_range = np.linspace(fit_range[0], fit_range[1], 1000)
+
+        # Now let's use the fit to get the thermal conductivity values over the range
+        # Luckily, every function type is defined in such a way to readily accept the parameter dictionary as it was defined above
+        y_vals = func_type(T_range, mat_parameters)
+        ax.fill_between(fill_between_range, np.zeros(len(fill_between_range)), func_type(fill_between_range, mat_parameters),
                     hatch="////", alpha = 0.5, edgecolor = 'b', facecolor="w",
                     label="Integration Area")
+    else:
+        print("PLOT Using interpolation for", selected_component.name)
+        interp_func = get_interpolation(os.path.join(path_to_mat_lib, selected_component.properties["Material"]))
+        print(interp_func)
+        T_range = np.linspace(interp_func.x[0], interp_func.x[-1], 1000)
+        y_vals = interp_func(T_range)
+
+        ax.fill_between(fill_between_range, np.zeros(len(fill_between_range)), interp_func(fill_between_range),
+                    hatch="////", alpha = 0.5, edgecolor = 'b', facecolor="w",
+                    label="Integration Area")
+
+    ax.plot(T_range, y_vals, color="b")
+    
     ax.semilogy()
     ax.semilogx()
     ax.legend()
@@ -284,3 +297,21 @@ def plot_integral(selected_component, stage):
     ax.set_xlabel("T [K]")
     ax.set_ylabel("Thermal Conductivity : k [W/m/K]")
     return fig, ax
+
+
+def find_interpolation(material):
+    """Check if an interpolation file exists for the given material.
+
+    Args:
+        material (str): The name of the material to check.  
+
+    Returns:
+        bool: True if the interpolation file exists, False otherwise.
+    """
+    interp_file = os.path.join(path_to_mat_lib, material, "interpolation.pkl")
+    interp_func = get_interpolation(os.path.join(path_to_mat_lib, material))
+    valid_range = [round(float(interp_func.x[0]), 2), round(float(interp_func.x[-1]), 2)]
+    if os.path.exists(interp_file):
+        return True, valid_range
+    else:
+        return False, None
