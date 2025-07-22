@@ -7,7 +7,7 @@ from subprocess import check_call
 
 HERE         = pathlib.Path(__file__).parent
 PACKAGE_NAME = 'thermal_model'
-VERSION      = '0.0.7'
+VERSION      = '0.0.7.1'
 AUTHOR       = 'Henry Nachman'
 AUTHOR_EMAIL = 'hen367@my.utexas.edu'
 URL          = 'https://github.com/henry-e-n/Balloon_Modeling_Tools'
@@ -87,5 +87,5 @@ setup(
 	install_requires=INSTALL_REQUIRES,
 	packages=find_packages(),
 	package_data={
-		'balloon_modeling_tools': ['*.json', '*.txt', '*.csv', '*.png'],
+		'balloon_modeling_tools': ['*.json', '*.txt', '*.csv', '*.png', '*.css', '*.html'],
 		})	
