@@ -8,9 +8,9 @@ package_path = os.path.dirname(file_path)
 path_to_cmr_definition = os.path.join(file_path, "cmr_path.txt")
 if not os.path.exists(path_to_cmr_definition):
     print("cmr_path.txt not found. Please define the path to CMR.")
-    define_CMR_path()
+    path_to_cmr = define_CMR_path()
 
-with open(os.path.join(file_path, "cmr_path.txt"), "r") as f:
+with open(path_to_cmr, "r") as f:
     cmr_path = f.read().strip()
 
 path_to_mat_lib = os.path.join(cmr_path, "thermal_conductivity", "lib")

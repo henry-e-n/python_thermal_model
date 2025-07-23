@@ -4,9 +4,18 @@ def define_CMR_path():
     # Save the path_to_cmr to a file
     path_to_cmr = input("Enter the path to CMR: ")
     config_file = os.path.join(os.path.dirname(__file__), 'cmr_path.txt')
-    with open(config_file, 'w') as f:
-        f.write(path_to_cmr)
-    return
+
+    try:
+        with open(config_file, 'w') as f:
+            f.write(path_to_cmr)
+        
+    except PermissionError:
+        print("Permission denied, please specify a valid path to save cmr_path.txt.")
+        save_path = input("Enter a valid path to save cmr_path.txt: ")
+        with open(os.path.join(save_path, 'cmr_path.txt'), 'w') as f:
+            f.write(path_to_cmr)
+        return os.path.join(save_path, 'cmr_path.txt')
+    return config_file
 
 def init_gui():
     """
