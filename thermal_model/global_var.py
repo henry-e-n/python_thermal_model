@@ -9,6 +9,8 @@ path_to_cmr_definition = os.path.join(file_path, "cmr_path.txt")
 if not os.path.exists(path_to_cmr_definition):
     print("cmr_path.txt not found. Please define the path to CMR.")
     path_to_cmr = define_CMR_path()
+else:
+    path_to_cmr = path_to_cmr_definition
 
 with open(path_to_cmr, "r") as f:
     cmr_path = f.read().strip()
