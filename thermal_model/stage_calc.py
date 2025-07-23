@@ -17,6 +17,24 @@ from thermal_conductivity.tc_utils import *
 from thermal_conductivity.fit_types import *
 
 def calculate_power_function(details, stage_temps, A_L = False):
+    """Calculate the power function for a given component.
+
+    Args:
+        details (dict): The details of the component.
+        stage_temps (dict): The temperature details of the stage.
+        A_L (bool, optional): Whether to use the A/L value. Defaults to False.
+
+    Returns:
+        float: The calculated power per unit length.
+    """
+
+    lowT, highT = stage_temps["lowT"], stage_temps["highT"]
+    mat = details["Material"]
+    if not A_L:
+        OD, ID = float(details["OD (m)"]), float(details["ID (m)"])
+        area = np.pi*(0.5*(OD))**2 - np.pi*(0.5*(ID))**2
+        length = details["Length (m)"]
+
     lowT, highT = stage_temps["lowT"], stage_temps["highT"]
     mat = details["Material"]
     if not A_L:
@@ -43,6 +61,21 @@ def calculate_power_function(details, stage_temps, A_L = False):
     return float(ppu)
 
 def get_all_powers(components, stage_details):
+    """Calculate the total power for all components in each stage.
+
+    Args:
+        components (dict): The component details.
+        stage_details (dict): The stage temperature details.
+
+    Returns:
+        dict: The updated component details with power calculations.
+    """
+    for stage, comps in components.items(): 
+        for comp, details in comps.items():
+            num = float(details["Number"])
+            if details.get("Type") == "Coax":
+                power_per_part = calculate_coax_power(details, stage_details[stage])
+                details["Power per Part (W)"] = power_per_part
     # print("\nGet All Powers Stage Details", stage_details)
     for stage, comps in components.items(): 
         for comp, details in comps.items():
@@ -65,6 +98,22 @@ def get_all_powers(components, stage_details):
 
 
 def calculate_coax_power(details, stage_temp):
+    """Calculate the power for coaxial components.
+
+    Args:
+        details (dict): The details of the coaxial component.
+        stage_temp (dict): The temperature details of the stage.
+
+    Returns:
+        float: The calculated power per part for the coaxial component.
+    """
+    # Implement the power calculation logic for Coax components here
+    # Example placeholder logic:
+    case_details = {"Material" : details["Casing Material"], "OD (m)" : details["Case OD (m)"], "ID (m)" : details["Insulator OD (m)"], "Length (m)" : details["Length (m)"], "Fit Choice": details["Casing Fit Choice"], "Interpolate": details["Casing Interpolate"]}
+    case_ppp = calculate_power_function(case_details, stage_temp)
+
+    insulator_details = {"Material" : details["Insulator Material"], "OD (m)" : details["Insulator OD (m)"], "ID (m)" : details["Core OD (m)"], "Length (m)" : details["Length (m)"], "Fit Choice": details["Insulator Fit Choice"], "Interpolate": details["Insulator Interpolate"]}
+    insulator_ppp = calculate_power_function(insulator_details, stage_temp)
     # Implement the power calculation logic for Coax components here
     # Example placeholder logic:
     case_details = {"Material" : details["Casing Material"], "OD (m)" : details["Case OD (m)"], "ID (m)" : details["Insulator OD (m)"], "Length (m)" : details["Length (m)"], "Fit Choice": details["Casing Fit Choice"], "Interpolate": details["Casing Interpolate"]}
@@ -83,6 +132,23 @@ def calculate_coax_power(details, stage_temp):
 
 
 def get_sum_variance(output_data):
+    """Calculate the sum variance for the output data.
+
+    Args:
+        output_data (dict): The output data containing stage details and total power.
+
+    Returns:
+        SumVariance: The calculated sum variance for each stage.
+        cooling_details_dict: A dictionary containing cooling details.
+    """
+    # print(f"\nSUM VARIANCE OUTPUT DATA : {output_data['stage_details']}")#, output_data["total_power"])
+    HeCap = 300 # L
+    FridgeCap = 6 #J
+    MaxFlightTime = 35*24*3600
+    HeRho = 0.125 #kg/L
+    HeLH = 21 #kJ/kg
+    Cpgas = 5.5 # kJ/(kg*K)
+    HeBP = 4.2 # K
     # print(f"\nSUM VARIANCE OUTPUT DATA : {output_data['stage_details']}")#, output_data["total_power"])
     HeCap = 300 # L
     FridgeCap = 6 #J
@@ -154,6 +220,15 @@ def get_sum_variance(output_data):
     return SumVariance, cooling_details_dict
 
 def cooling_power(TempOut, TempIn, Power4k, Efficiency):
+    """Calculate the cooling power based on the temperatures and efficiency.
+    Args:
+        TempOut (float): The output temperature.
+        TempIn (float): The input temperature.
+        Power4k (float): The power at 4K.
+        Efficiency (float): The efficiency of the cooling system.
+    Returns:
+        float: The calculated cooling power.
+    """
     cp = 5.205453 * TempOut - 18.689101
     ci = 5.205453 * TempIn - 18.689101
     CoolingPower = (cp - ci) * Efficiency * Power4k / 21
@@ -163,6 +238,15 @@ def optimize_tm(components_input, stage_details_input, num_points=10):
     """
     Optimizes a VCS cooled thermal model
     Takes in components dictionary and stage details dictionary
+    Args:
+        components_input (dict): The input component details.
+        stage_details_input (dict): The input stage details.
+        num_points (int): The number of points to sample for VCS temperatures.
+    Returns:
+        details (dict): The updated component details with power calculations.
+        output_data (dict): The output data containing stage details and total power.
+        grids (list): A list containing the VCS2 grid, VCS1 grid, and SumVarArr.
+
     """
     # Step one - import data
     # Step two - calculate power
@@ -226,6 +310,13 @@ def optimize_tm(components_input, stage_details_input, num_points=10):
 
 
 def save_to_json_manual(components, stage_details):
+    """Save the components and stage details to a JSON file.
+    Args:
+        components (dict): The component details.
+        stage_details (dict): The stage temperature details.
+    Returns:
+        dict: A dictionary containing the components, stage details, and total power.
+    """
     # Include stage details and total power in the JSON data
     output_data = {
         "components": components,
@@ -238,14 +329,14 @@ def save_to_json_manual(components, stage_details):
 def plot_integral(selected_component, stage):
     """
     Description:
-    This function plots the thermal conductivity of a selected component over the temperature range defined by the stage.
+        This function plots the thermal conductivity of a selected component over the temperature range defined by the stage.
 
-    Arguments:
-    selected_component : The component whose thermal conductivity is to be plotted.
-    stage              : The stage object containing temperature information.
+    Args:
+        selected_component : The component whose thermal conductivity is to be plotted.
+        stage              : The stage object containing temperature information.
 
     Returns:
-    fig, ax : The figure and axis objects for the plot.
+        fig, ax : The figure and axis objects for the plot.
     """
 
     all_files       = os.listdir(cmr_path)
