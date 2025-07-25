@@ -25,7 +25,7 @@ def calculate_power_function(details, stage_temps, A_L = False):
         A_L (bool, optional): Whether to use the A/L value. Defaults to False.
 
     Returns:
-        float: The calculated power per unit length.
+        float: The calculated power per unit.
     """
 
     lowT, highT = stage_temps["lowT"], stage_temps["highT"]
@@ -326,70 +326,6 @@ def save_to_json_manual(components, stage_details):
     return output_data # dict(content=json.dumps(output_data, indent=4), filename="components.json")
 
 
-def plot_integral(selected_component, stage):
-    """
-    Description:
-        This function plots the thermal conductivity of a selected component over the temperature range defined by the stage.
-
-    Args:
-        selected_component : The component whose thermal conductivity is to be plotted.
-        stage              : The stage object containing temperature information.
-
-    Returns:
-        fig, ax : The figure and axis objects for the plot.
-    """
-
-    all_files       = os.listdir(cmr_path)
-    T_low, T_high = [stage.low_temp, stage.high_temp]
-    # Plotting
-    fill_between_range = np.arange(T_low, T_high)
-    
-    fig, ax = plt.subplots()
-
-    if not selected_component.properties["Interpolate"]:
-        exist_files     = [file for file in all_files if file.startswith("tc_fullrepo")]
-        tc_file_date    = exist_files[0][-12:-4]
-
-        material_of_interest = selected_component.properties["Material"]
-        print(material_of_interest)
-        TCdata = np.loadtxt(os.path.join(cmr_path, "thermal_conductivity", "lib", material_of_interest, "all_fits.csv"), dtype=str, delimiter=',') # imports compilation file csv
-        print(TCdata)
-        mat_parameters = get_parameters(TCdata, selected_component.properties["Fit Choice"])
-        func_type = get_func_type(mat_parameters["fit_type"])
-        print(func_type)
-        fit_range = mat_parameters["fit_range"]
-
-        # Let's make our plotting range the listed fit range
-        T_range = np.linspace(fit_range[0], fit_range[1], 1000)
-
-        # Now let's use the fit to get the thermal conductivity values over the range
-        # Luckily, every function type is defined in such a way to readily accept the parameter dictionary as it was defined above
-        y_vals = func_type(T_range, mat_parameters)
-        ax.fill_between(fill_between_range, np.zeros(len(fill_between_range)), func_type(fill_between_range, mat_parameters),
-                    hatch="////", alpha = 0.5, edgecolor = 'b', facecolor="w",
-                    label="Integration Area")
-    else:
-        print("PLOT Using interpolation for", selected_component.name)
-        interp_func = get_interpolation(os.path.join(path_to_mat_lib, selected_component.properties["Material"]))
-        print(interp_func)
-        T_range = np.linspace(interp_func.x[0], interp_func.x[-1], 1000)
-        y_vals = interp_func(T_range)
-
-        ax.fill_between(fill_between_range, np.zeros(len(fill_between_range)), interp_func(fill_between_range),
-                    hatch="////", alpha = 0.5, edgecolor = 'b', facecolor="w",
-                    label="Integration Area")
-
-    ax.plot(T_range, y_vals, color="b")
-    
-    ax.semilogy()
-    ax.semilogx()
-    ax.legend()
-    ax.set_title(f"Plot of  {selected_component.name}")
-    ax.set_xlabel("T [K]")
-    ax.set_ylabel("Thermal Conductivity : k [W/m/K]")
-    return fig, ax
-
-
 def find_interpolation(material):
     """Check if an interpolation file exists for the given material.
 
@@ -406,3 +342,8 @@ def find_interpolation(material):
         return True, valid_range
     else:
         return False, None
+    
+def load_thermal_model(json_path):
+    with open(json_path, 'r') as f:
+        thermal_model = json.load(f)
+    return thermal_model

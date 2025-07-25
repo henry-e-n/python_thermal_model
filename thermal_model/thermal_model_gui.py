@@ -15,7 +15,7 @@ import matplotlib as mpl
 from streamlit_extras.stylable_container import stylable_container
 
 from global_var import cmr_path, path_to_mat_lib
-
+from plotting import *
 
 # Define Paths
 
@@ -540,26 +540,7 @@ with tabs[2]:
     if stage.components:
         st.subheader(f"Power Distribution for {stage.name}")
 
-        # Prepare data for the pie chart
-        data = {
-            "Component": [component.name for component in stage.components],
-            "Power (W)": [
-                float(component.properties.get("Power Total (W)", 0)) for component in stage.components
-            ],
-        }
-        df = pd.DataFrame(data)
-
-        # Plot the pie chart using Plotly with hover showing power in scientific notation
-        fig = px.pie(
-            df, 
-            names="Component", 
-            values="Power (W)", 
-            title=f"Power Distribution for {stage.name}", 
-            color_discrete_sequence=px.colors.sequential.RdBu,
-            hover_data={"Power (W)": ":e"},  # Format hover data in scientific notation
-        )
-        fig.update_traces(textposition='inside', textinfo='percent+label')
-        st.plotly_chart(fig)
+        plot_pie_chart(stage)
 
         # Dropdown to select a component for detailed view
         selected_component = st.selectbox(
