@@ -25,7 +25,7 @@ def calculate_power_function(details, stage_temps, A_L = False):
         A_L (bool, optional): Whether to use the A/L value. Defaults to False.
 
     Returns:
-        float: The calculated power per unit.
+        ppu (float): The calculated power per unit.
     """
 
     lowT, highT = stage_temps["lowT"], stage_temps["highT"]
@@ -68,7 +68,7 @@ def get_all_powers(components, stage_details):
         stage_details (dict): The stage temperature details.
 
     Returns:
-        dict: The updated component details with power calculations.
+        components (dict): The updated component details with power calculations.
     """
     for stage, comps in components.items(): 
         for comp, details in comps.items():
@@ -105,7 +105,7 @@ def calculate_coax_power(details, stage_temp):
         stage_temp (dict): The temperature details of the stage.
 
     Returns:
-        float: The calculated power per part for the coaxial component.
+        power_per_part (float): The calculated power per part for the coaxial component.
     """
     # Implement the power calculation logic for Coax components here
     # Example placeholder logic:
@@ -227,7 +227,7 @@ def cooling_power(TempOut, TempIn, Power4k, Efficiency):
         Power4k (float): The power at 4K.
         Efficiency (float): The efficiency of the cooling system.
     Returns:
-        float: The calculated cooling power.
+        CoolingPower  (float): The calculated cooling power.
     """
     cp = 5.205453 * TempOut - 18.689101
     ci = 5.205453 * TempIn - 18.689101
@@ -315,7 +315,7 @@ def save_to_json_manual(components, stage_details):
         components (dict): The component details.
         stage_details (dict): The stage temperature details.
     Returns:
-        dict: A dictionary containing the components, stage details, and total power.
+        output_data (dict): A dictionary containing the components, stage details, and total power.
     """
     # Include stage details and total power in the JSON data
     output_data = {

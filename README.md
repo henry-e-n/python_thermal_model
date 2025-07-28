@@ -12,3 +12,6 @@ To run the streamlit gui:
 from thermal_model.gui_init import init_gui
 init_gui()
 ```
+
+Explore the wiki:
+https://github.com/henry-e-n/python_thermal_model/wiki/0.-Thermal-Model-Wiki
