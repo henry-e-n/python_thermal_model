@@ -51,7 +51,7 @@ def get_dark_color():
 
 # Initialize stages and components
 if 'main_stage' not in st.session_state:
-    st.session_state.main_stage = Stage("Stage 1", high_temp=270.0, low_temp=60.0, color=get_color())
+    st.session_state.main_stage = [] # Stage("Stage 1", high_temp=270.0, low_temp=60.0, color=get_color())
 
 # st.write("Session State:", st.session_state)
 # Initialize session state
@@ -64,6 +64,10 @@ if 'optimize_clicked' not in st.session_state:
 if 'optimized' not in st.session_state:
     st.session_state.optimized = False
 
+if st.session_state.main_stage == []:
+    st.session_state.stages_exist = False
+else:
+    st.session_state.stages_exist = True
 # Include custom CSS
 with open(f"{file_path}{os.sep}static{os.sep}styles.css") as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
@@ -73,10 +77,9 @@ title_area, logo_area = st.columns(2)
 title_area.title("Interactive Thermal Model GUI")
 logo_area.image(f"{file_path}{os.sep}static{os.sep}blast-logo.png", width=200)  # Display the logo in the main body
 
-tabs = st.tabs(["Component Modeling", "Result Tables", "Plots"])
+tabs = st.tabs(["Component Modeling", "Result Tables", "Plots", "About"])
 
 
-# print("CHECKPOINT 2")
 # Main Page Content
 with tabs[0]:
     
@@ -84,13 +87,9 @@ with tabs[0]:
     st.sidebar.header("Add Components and Stages")
 
 
-    # Select a stage to add the component to
-    selected_stage_name = st.sidebar.selectbox("Select Stage to Add Component",
-                                            [st.session_state.main_stage.name] + [stage.name for stage in st.session_state.main_stage.stages])
-
+   
+    
     # Select the type of component you want to add
-    component_type_list = ["Stage", "Standard", "A/L", "Coax", "Power per Part"]
-    selected_comp_type = st.sidebar.selectbox("Select Component Type", component_type_list)
     
     def get_material_fits(material):
         all_fits_file = os.path.join(path_to_mat_lib, material, "all_fits.csv")
@@ -101,6 +100,105 @@ with tabs[0]:
         
               
     def sidebar_inputs():
+        if st.session_state.main_stage == []:
+            st.sidebar.warning("Please add a stage to begin")
+            selected_comp_type = "Stage"
+        else:
+            # Select a stage to add the component to
+            selected_stage_name = st.sidebar.selectbox("Select Stage to Add Component",
+                                                    [st.session_state.main_stage.name] + [stage.name for stage in st.session_state.main_stage.stages])
+            component_type_list = ["Stage", "Standard", "A/L", "Coax", "Power per Part"]
+            selected_comp_type = st.sidebar.selectbox("Select Component Type", component_type_list)
+        
+            
+            # Dictionary to hold component properties
+            component_properties = {}
+
+            if selected_comp_type == "Standard":
+                # Add input fields for Standard component properties
+                component_properties["Type"] = "Standard"
+                component_properties["Material"] = st.sidebar.selectbox("Material", mat_list)
+                has_interpolation, valid_range = find_interpolation(component_properties["Material"]) # Searches for interpolation file, returns True if it exists
+                if has_interpolation: # If interpolation file exists
+                    component_properties["Interpolate"] = st.sidebar.checkbox(f"Use Interpolation in range :\n{valid_range[0]} K - {valid_range[1]} K", value=True) # Provide checkbox to use interpolation
+                if not component_properties["Interpolate"]: # If interpolation is not selected, search for available fits
+                    component_properties["Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fits(component_properties["Material"]).keys())
+                else:
+                    component_properties["Fit Choice"] = None
+                component_properties["OD (m)"] = st.sidebar.number_input("OD (m)", value=0.0, format="%.3f")
+                component_properties["ID (m)"] = st.sidebar.number_input("ID (m)", value=0.0, format="%.3f")
+                component_properties["Length (m)"] = st.sidebar.number_input("Length (m)", value=0.0, format="%.3f")
+                component_properties["Number"] = st.sidebar.number_input("Number", value=1, format="%d")
+
+            if selected_comp_type == "A/L":
+                # Add input fields for A/L component properties
+                component_properties["Type"] = "A/L"
+                component_properties["Material"] = st.sidebar.selectbox("Material", mat_list)
+                has_interpolation, valid_range = find_interpolation(component_properties["Material"]) # Searches for interpolation file, returns True if it exists
+                if has_interpolation: # If interpolation file exists
+                    component_properties["Interpolate"] = st.sidebar.checkbox(f"Use Interpolation in range :\n{valid_range[0]} K - {valid_range[1]} K", value=True) # Provide checkbox to use interpolation
+                if not component_properties["Interpolate"]: # If interpolation is not selected, search for available fits
+                    component_properties["Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fits(component_properties["Material"]).keys())
+                else:
+                    component_properties["Fit Choice"] = None
+                component_properties["A/L (m)"] = st.sidebar.number_input("A/L (m)", value=0.0, format="%.3f")
+                component_properties["Length (m)"] = st.sidebar.number_input("Length (m)", value=0.0, format="%.3f")
+                component_properties["Number"] = st.sidebar.number_input("Number", value=1, format="%d")
+
+            if selected_comp_type == "Coax":
+                # Add input fields for Coax component properties
+                component_properties["Type"] = "Coax"
+                component_properties["Casing Material"] = st.sidebar.selectbox("Casing Material", mat_list)
+                has_interpolation, valid_range = find_interpolation(component_properties["Casing Material"]) # Searches for interpolation file, returns True if it exists
+                if has_interpolation: # If interpolation file exists
+                    component_properties["Casing Interpolate"] = st.sidebar.checkbox(f"Use Interpolation for Casing material in range :\n{valid_range[0]} K - {valid_range[1]} K", value=True) # Provide checkbox to use interpolation
+                else:
+                    component_properties["Casing Interpolate"] = False
+                if not component_properties["Casing Interpolate"]: # If interpolation is not selected, search for available fits
+                    component_properties["Casing Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fits(component_properties["Casing Material"]).keys())
+                else:
+                    component_properties["Casing Fit Choice"] = None
+
+                component_properties["Insulator Material"] = st.sidebar.selectbox("Insulator Material", mat_list)
+                has_interpolation, valid_range = find_interpolation(component_properties["Insulator Material"]) # Searches for interpolation file, returns True if it exists
+                if has_interpolation: # If interpolation file exists
+                    component_properties["Insulator Interpolate"] = st.sidebar.checkbox(f"Use Interpolation for Insulator material in range :\n{valid_range[0]} K - {valid_range[1]} K", value=True) # Provide checkbox to use interpolation
+                else:
+                    component_properties["Insulator Interpolate"] = False
+                if not component_properties["Insulator Interpolate"]: # If interpolation is not selected, search for available fits
+                    component_properties["Insulator Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fits(component_properties["Insulator Material"]).keys())
+                else:
+                    component_properties["Insulator Fit Choice"] = None
+
+                component_properties["Core Material"] = st.sidebar.selectbox("Core Material", mat_list)
+                has_interpolation, valid_range = find_interpolation(component_properties["Core Material"]) # Searches for interpolation file, returns True if it exists
+                if has_interpolation: # If interpolation file exists
+                    component_properties["Core Interpolate"] = st.sidebar.checkbox(f"Use Interpolation for Core material in range :\n{valid_range[0]} K - {valid_range[1]} K", value=True) # Provide checkbox to use interpolation
+                else:
+                    component_properties["Core Interpolate"] = False
+                if not component_properties["Core Interpolate"]: # If interpolation is not selected, search for available fits
+                    component_properties["Core Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fits(component_properties["Core Material"]).keys())
+                else:
+                    component_properties["Core Fit Choice"] = None
+
+                component_properties["Case OD (m)"] = st.sidebar.number_input("Case OD (m)", value=0.0, format="%.3f")
+                component_properties["Insulator OD (m)"] = st.sidebar.number_input("Insulator OD (m)", value=0.0, format="%.3f")
+                component_properties["Core OD (m)"] = st.sidebar.number_input("Core OD (m)", value=0.0, format="%.3f")
+                component_properties["Length (m)"] = st.sidebar.number_input("Length (m)", value=0.0, format="%.3f")
+                component_properties["Number"] = st.sidebar.number_input("Number", value=1, format="%d")
+
+            if selected_comp_type == "Power per Part":
+                # Add input fields for Power per Part component properties
+                component_properties["Type"] = "Power per Part"
+                component_properties["Power per Part (W)"] = st.sidebar.number_input("Power per Part (W)", value=0.0, format="%.3f")
+                component_properties["Number"] = st.sidebar.number_input("Number", value=1, format="%d")
+
+            if "Transient" in selected_stage_name:
+                component_properties["Time On (h/d)"] = st.sidebar.number_input("Time On (h/d)", value=0.0, format="%.1f", max_value=24.0, step = 0.5)
+                component_properties["Time Off (h/d)"] = st.sidebar.number_input("Time Off (h/d)", value=0.0, format="%.1f", max_value=24.0, step = 0.5)
+
+        ############################################################
+        ############################################################
         # Input field for naming the component or stage
         name = st.sidebar.text_input("Name")
 
@@ -112,102 +210,19 @@ with tabs[0]:
             low_temp = st.sidebar.number_input("Low Temperature (°K)", key="LowTemp", value=25.0, format="%.1f")
             high_temp = st.sidebar.number_input("High Temperature (°K)", key="HighTemp", value=270.0, format="%.1f")
 
-        # Dictionary to hold component properties
-        component_properties = {}
-
-        if selected_comp_type == "Standard":
-            # Add input fields for Standard component properties
-            component_properties["Type"] = "Standard"
-            component_properties["Material"] = st.sidebar.selectbox("Material", mat_list)
-            has_interpolation, valid_range = find_interpolation(component_properties["Material"]) # Searches for interpolation file, returns True if it exists
-            if has_interpolation: # If interpolation file exists
-                component_properties["Interpolate"] = st.sidebar.checkbox(f"Use Interpolation in range :\n{valid_range[0]} K - {valid_range[1]} K", value=True) # Provide checkbox to use interpolation
-            if not component_properties["Interpolate"]: # If interpolation is not selected, search for available fits
-                component_properties["Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fits(component_properties["Material"]).keys())
-            else:
-                component_properties["Fit Choice"] = None
-            component_properties["OD (m)"] = st.sidebar.number_input("OD (m)", value=0.0, format="%.3f")
-            component_properties["ID (m)"] = st.sidebar.number_input("ID (m)", value=0.0, format="%.3f")
-            component_properties["Length (m)"] = st.sidebar.number_input("Length (m)", value=0.0, format="%.3f")
-            component_properties["Number"] = st.sidebar.number_input("Number", value=1, format="%d")
-
-        if selected_comp_type == "A/L":
-            # Add input fields for A/L component properties
-            component_properties["Type"] = "A/L"
-            component_properties["Material"] = st.sidebar.selectbox("Material", mat_list)
-            has_interpolation, valid_range = find_interpolation(component_properties["Material"]) # Searches for interpolation file, returns True if it exists
-            if has_interpolation: # If interpolation file exists
-                component_properties["Interpolate"] = st.sidebar.checkbox(f"Use Interpolation in range :\n{valid_range[0]} K - {valid_range[1]} K", value=True) # Provide checkbox to use interpolation
-            if not component_properties["Interpolate"]: # If interpolation is not selected, search for available fits
-                component_properties["Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fits(component_properties["Material"]).keys())
-            else:
-                component_properties["Fit Choice"] = None
-            component_properties["A/L (m)"] = st.sidebar.number_input("A/L (m)", value=0.0, format="%.3f")
-            component_properties["Length (m)"] = st.sidebar.number_input("Length (m)", value=0.0, format="%.3f")
-            component_properties["Number"] = st.sidebar.number_input("Number", value=1, format="%d")
-
-        if selected_comp_type == "Coax":
-            # Add input fields for Coax component properties
-            component_properties["Type"] = "Coax"
-            component_properties["Casing Material"] = st.sidebar.selectbox("Casing Material", mat_list)
-            has_interpolation, valid_range = find_interpolation(component_properties["Casing Material"]) # Searches for interpolation file, returns True if it exists
-            if has_interpolation: # If interpolation file exists
-                component_properties["Casing Interpolate"] = st.sidebar.checkbox(f"Use Interpolation for Casing material in range :\n{valid_range[0]} K - {valid_range[1]} K", value=True) # Provide checkbox to use interpolation
-            else:
-                component_properties["Casing Interpolate"] = False
-            if not component_properties["Casing Interpolate"]: # If interpolation is not selected, search for available fits
-                component_properties["Casing Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fits(component_properties["Casing Material"]).keys())
-            else:
-                component_properties["Casing Fit Choice"] = None
-
-            component_properties["Insulator Material"] = st.sidebar.selectbox("Insulator Material", mat_list)
-            has_interpolation, valid_range = find_interpolation(component_properties["Insulator Material"]) # Searches for interpolation file, returns True if it exists
-            if has_interpolation: # If interpolation file exists
-                component_properties["Insulator Interpolate"] = st.sidebar.checkbox(f"Use Interpolation for Insulator material in range :\n{valid_range[0]} K - {valid_range[1]} K", value=True) # Provide checkbox to use interpolation
-            else:
-                component_properties["Insulator Interpolate"] = False
-            if not component_properties["Insulator Interpolate"]: # If interpolation is not selected, search for available fits
-                component_properties["Insulator Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fits(component_properties["Insulator Material"]).keys())
-            else:
-                component_properties["Insulator Fit Choice"] = None
-
-            component_properties["Core Material"] = st.sidebar.selectbox("Core Material", mat_list)
-            has_interpolation, valid_range = find_interpolation(component_properties["Core Material"]) # Searches for interpolation file, returns True if it exists
-            if has_interpolation: # If interpolation file exists
-                component_properties["Core Interpolate"] = st.sidebar.checkbox(f"Use Interpolation for Core material in range :\n{valid_range[0]} K - {valid_range[1]} K", value=True) # Provide checkbox to use interpolation
-            else:
-                component_properties["Core Interpolate"] = False
-            if not component_properties["Core Interpolate"]: # If interpolation is not selected, search for available fits
-                component_properties["Core Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fits(component_properties["Core Material"]).keys())
-            else:
-                component_properties["Core Fit Choice"] = None
-
-            component_properties["Case OD (m)"] = st.sidebar.number_input("Case OD (m)", value=0.0, format="%.3f")
-            component_properties["Insulator OD (m)"] = st.sidebar.number_input("Insulator OD (m)", value=0.0, format="%.3f")
-            component_properties["Core OD (m)"] = st.sidebar.number_input("Core OD (m)", value=0.0, format="%.3f")
-            component_properties["Length (m)"] = st.sidebar.number_input("Length (m)", value=0.0, format="%.3f")
-            component_properties["Number"] = st.sidebar.number_input("Number", value=1, format="%d")
-
-        if selected_comp_type == "Power per Part":
-            # Add input fields for Power per Part component properties
-            component_properties["Type"] = "Power per Part"
-            component_properties["Power per Part (W)"] = st.sidebar.number_input("Power per Part (W)", value=0.0, format="%.3f")
-            component_properties["Number"] = st.sidebar.number_input("Number", value=1, format="%d")
-
-        if "Transient" in selected_stage_name:
-            component_properties["Time On (h/d)"] = st.sidebar.number_input("Time On (h/d)", value=0.0, format="%.1f", max_value=24.0, step = 0.5)
-            component_properties["Time Off (h/d)"] = st.sidebar.number_input("Time Off (h/d)", value=0.0, format="%.1f", max_value=24.0, step = 0.5)
-
-        ############################################################
-        ############################################################
 
         # Button to add a new component or stage
         if st.sidebar.button("Add") and name:
             if selected_comp_type == "Stage":
                 # Add a new stage
-                new_stage = Stage(name, high_temp = high_temp, low_temp = low_temp, color=get_color())
-                st.session_state.main_stage.add_stage(new_stage)
-                st.sidebar.success(f"Stage '{name}' added!")
+                if st.session_state.stages_exist == False:
+                    st.session_state.main_stage = Stage(name, high_temp=high_temp, low_temp=low_temp, color=get_color())
+                    st.sidebar.success(f"First stage added!")
+                    st.session_state.stages_exist = True               
+                else:
+                    new_stage = Stage(name, high_temp = high_temp, low_temp = low_temp, color=get_color())
+                    st.session_state.main_stage.add_stage(new_stage)
+                    st.sidebar.success(f"Stage '{name}' added!")
             else:
                 # Add a new component to the selected stage
                 selected_stage = next((stage for stage in [st.session_state.main_stage] + st.session_state.main_stage.stages if stage.name == selected_stage_name), None)
@@ -220,16 +235,17 @@ with tabs[0]:
                     new_component = Component(name, properties=component_properties)
                     selected_stage.add_component(new_component)
                     st.sidebar.success(f"Component '{name}' added to '{selected_stage_name}'!")
-
+            st.rerun() 
     
-    # print("CHECKPOINT 3")
     sidebar_inputs()
-    # print("CHECKPOINT 4")
 
-    substages = [sub_stage for sub_stage in st.session_state.main_stage.stages if sub_stage.name != st.session_state.main_stage.name]
-    all_stages = [st.session_state.main_stage] + substages
-    
-    # print("CHECKPOINT 5 - Main STAGE", all_stages[0].name, all_stages[0].low_temp, all_stages[0].high_temp)
+    try:
+        substages = [sub_stage for sub_stage in st.session_state.main_stage.stages if sub_stage.name != st.session_state.main_stage.name]
+        all_stages = [st.session_state.main_stage] + substages
+    except AttributeError:
+        st.warning("No stages available. Please add a stage to begin.")
+        substages = []
+        all_stages = []
 
     # Function to save stages and components to a JSON file
     def save_to_json(stages):
@@ -300,10 +316,8 @@ with tabs[0]:
         loaded_stages = load_from_json(json_data)
         st.session_state.main_stage = loaded_stages[0]
         st.session_state.main_stage.stages = loaded_stages[1:]
-        print("Loading JSON", st.session_state)
         st.sidebar.success("JSON loaded successfully!")
 
-    # print("CHECKPOINT 6")
     # Button to clear everything
     # with stylable_container(
     #     "green",
@@ -424,7 +438,6 @@ with tabs[0]:
                         j += 1
     # Define Stages
 
-    # print("CHECKPOINT 7")
     def get_stage_details(all_stages):
             
         stage_details = {}
@@ -442,7 +455,6 @@ with tabs[0]:
     
     stage_components_dict, stage_details = get_stage_details(all_stages)
 
-    # print("CHECKPOINT 8")
     def calc_power_button_press(stage_components_dict, stage_details):
         components_dict = get_all_powers(stage_components_dict, stage_details)
         for stage_name, components in components_dict.items():
@@ -471,7 +483,6 @@ with tabs[0]:
     if button_col1:
         all_stages, updated_cooling_data = calc_power_button_press(stage_components_dict, stage_details)
 
-    # print("CHECKPOINT 9")
     optim_clicked = st.session_state.get("optimize_clicked", False)
     button_clicked = button_col2.button("Optimize", use_container_width=True, type="primary")
     optim_number = button_col2.slider("Optimize Points", min_value=5, max_value=100, value=10, step=5, key="optimize_slider")
@@ -506,7 +517,6 @@ with tabs[0]:
             st.warning("Optimization can only run with a complete system. Please add a VCS 2 stage.")
         st.session_state.optimize_clicked = False
 
-    # print("CHECKPOINT 10")
     # Display the main stage and nested stages
     st.header("Stages")
     # display_stage(st.session_state.main_stage)
@@ -526,79 +536,103 @@ updated_temperature_data = [
 
 temp_data_df = pd.DataFrame.from_records(updated_temperature_data) #, columns=["Property", "Value"])
 cooling_data_df = pd.DataFrame.from_dict(updated_cooling_data, orient='index', columns=["Value", "Units"])
-# print("CHECKPOINT 11")
 with tabs[1]:
     st.dataframe(temp_data_df, use_container_width=True, hide_index=True)
     st.dataframe(cooling_data_df, use_container_width=True)
-# print("CHECKPOINT 12")
 with tabs[2]:
     st.header("Plots")
 
-    # Select a stage for plotting
-    stage = st.pills("Select Stage for Plot", all_stages, default=all_stages[0], format_func=lambda stage: stage.name, key="selected_stage_plot")
+    if st.session_state.stages_exist:
+        # Select a stage for plotting
+        stage = st.pills("Select Stage for Plot", all_stages, default=all_stages[0], format_func=lambda stage: stage.name, key="selected_stage_plot")
 
-    if stage.components:
-        st.subheader(f"Power Distribution for {stage.name}")
+        if stage.components:
+            st.subheader(f"Power Distribution for {stage.name}")
 
-        plot_pie_chart(stage)
+            plot_pie_chart(stage)
 
-        # Dropdown to select a component for detailed view
-        selected_component = st.selectbox(
-            "Select Component for Details",
-            stage.components,
-            format_func=lambda component: component.name,
-            key="selected_component_dropdown"
-        )
-
-        # Display selected component details
-        if selected_component:
-            st.subheader(f"Details for {selected_component.name}")
-            component_df = pd.DataFrame(
-                list(selected_component.properties.items()),
-                columns=["Property", "Value"]
+            # Dropdown to select a component for detailed view
+            selected_component = st.selectbox(
+                "Select Component for Details",
+                stage.components,
+                format_func=lambda component: component.name,
+                key="selected_component_dropdown"
             )
-            st.dataframe(component_df, use_container_width=True, hide_index=True)
 
-            try:
-                int_fig, int_ax = plot_integral(selected_component, stage)
-                left_col, mid_col, right_col = st.columns([0.2, 0.6, 0.2])
-                mid_col.pyplot(int_fig, use_container_width=True)
-            except:
-                st.warning("Integral plot not available for this component type.")
+            # Display selected component details
+            if selected_component:
+                st.subheader(f"Details for {selected_component.name}")
+                component_df = pd.DataFrame(
+                    list(selected_component.properties.items()),
+                    columns=["Property", "Value"]
+                )
+                st.dataframe(component_df, use_container_width=True, hide_index=True)
 
-    # Sum Var plot
-    left_col, mid_col, right_col = st.columns([0.2, 0.6, 0.2])
-    try:
-        fig, ax = plt.subplots()
+                try:
+                    int_fig, int_ax = plot_integral(selected_component, stage)
+                    left_col, mid_col, right_col = st.columns([0.2, 0.6, 0.2])
+                    mid_col.pyplot(int_fig, use_container_width=True)
+                except:
+                    st.warning("Integral plot not available for this component type.")
 
-        cmap = plt.cm.jet  # define the colormap
-        # extract all colors from the .jet map
-        cmaplist = [cmap(i) for i in range(cmap.N)]
-        # force the first color entry to be grey
+        # Sum Var plot
+        left_col, mid_col, right_col = st.columns([0.2, 0.6, 0.2])
+        try:
+            fig, ax = plt.subplots()
 
-        # create the new map
-        cmap = mpl.colors.LinearSegmentedColormap.from_list(
-            'Custom cmap', cmaplist, cmap.N)
+            cmap = plt.cm.jet  # define the colormap
+            # extract all colors from the .jet map
+            cmaplist = [cmap(i) for i in range(cmap.N)]
+            # force the first color entry to be grey
 
+            # create the new map
+            cmap = mpl.colors.LinearSegmentedColormap.from_list(
+                'Custom cmap', cmaplist, cmap.N)
+
+            
+            # define the bins and normalize
+            bounds = np.linspace(-10, 1, 20)
+            norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
+
+
+            [VCS2grid, VCS1grid, SumVarArr] = st.session_state.optimized
+            hm = ax.imshow(np.log(SumVarArr), extent=(VCS1grid.min(), VCS1grid.max(), VCS2grid.min(), VCS2grid.max()), origin='lower', cmap="Blues_r", aspect='auto')
+
+
+
+
+
+
+            fig.colorbar(hm, label='ln(Sum Variance)')#, cmap=cmap, norm=norm, spacing="proportional", ticks=bounds, boundaries=bounds)#, ticks=np.round(np.linspace(SumVarArr.min(), SumVarArr.max(), 5)), format='%.2f')
+            ax.set_ylabel('VCS2 temperature')
+            ax.set_xlabel('VCS1 temperature')
+            ax.set_title('2D Heatmap of Stage Temperature Variance')
+            plt.savefig(f"{file_path}{os.sep}Screenshots{os.sep}heatmap.png", dpi=600, bbox_inches='tight')
+            mid_col.pyplot(fig, use_container_width=True)
+        except Exception as e:
+            st.warning(f"Error {e} Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
+
+with tabs[3]:
+    st.header("About")
+    st.markdown("""
+        This is an interactive thermal model GUI for modeling the thermal properties of cryogenic systems.
+        It allows users to add components, stages, and visualize the thermal properties of the system.
+        The development of this tool was done in support of the Balloon-borne Large Aperture Sub-millimeter Telescopes (BLAST) collaboration.
+        ### Features:
+        - Add and edit components and stages.
+        - Calculate total thermal power requirements.
+        - Optimize liquid helium cryogenic stage temperatures.
+        - Calculate liquid helium and balloon specific parameters.
+        - Visualize power distribution and temperature variance.
+        parametersparameters
         
-        # define the bins and normalize
-        bounds = np.linspace(-10, 1, 20)
-        norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
+        ### Help
+        For more guidance, please refer to the [documentation](https://github.com/henry-e-n/python_thermal_model/wiki/0.-Thermal-Model-Wiki).
+        
+        ### Creators:
+        This tool is a culmination of decades of various similar efforts by researchers across experimental cosmology, and other cryogenic experimental fields. 
+                The development of this Python-based tool, package, and GUI was led by Henry Nachman at the University of Texas at Austin.
 
-
-        [VCS2grid, VCS1grid, SumVarArr] = st.session_state.optimized
-        hm = ax.imshow(np.log(SumVarArr), extent=(VCS1grid.min(), VCS1grid.max(), VCS2grid.min(), VCS2grid.max()), origin='lower', cmap="Blues_r", aspect='auto')
-
-
-
-
-
-
-        fig.colorbar(hm, label='ln(Sum Variance)')#, cmap=cmap, norm=norm, spacing="proportional", ticks=bounds, boundaries=bounds)#, ticks=np.round(np.linspace(SumVarArr.min(), SumVarArr.max(), 5)), format='%.2f')
-        ax.set_ylabel('VCS2 temperature')
-        ax.set_xlabel('VCS1 temperature')
-        ax.set_title('2D Heatmap of Stage Temperature Variance')
-        plt.savefig(f"{file_path}{os.sep}Screenshots{os.sep}heatmap.png", dpi=600, bbox_inches='tight')
-        mid_col.pyplot(fig, use_container_width=True)
-    except Exception as e:
-        st.warning(f"Error {e} Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
+        If you have any questions, suggestions, or issues, please feel free to reach out:
+        
+        Henry Nachman (henry.nachman@utexas.edu)""")

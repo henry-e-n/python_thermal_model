@@ -76,7 +76,6 @@ def get_all_powers(components, stage_details):
             if details.get("Type") == "Coax":
                 power_per_part = calculate_coax_power(details, stage_details[stage])
                 details["Power per Part (W)"] = power_per_part
-    # print("\nGet All Powers Stage Details", stage_details)
     for stage, comps in components.items(): 
         for comp, details in comps.items():
             num = float(details["Number"])
@@ -91,7 +90,6 @@ def get_all_powers(components, stage_details):
                 details["Power per Part (W)"] = power_per_part
             else:
                 power_per_part = float(details["Power per Part (W)"])
-            # print(f"\nComponent Power Calc, {comp} in {stage} with stage temps {stage_details[stage]} -- Power per Part: {power_per_part} W, Number: {num}")
             details["Power Total (W)"] = float(power_per_part * num)
     
     return components
@@ -141,7 +139,6 @@ def get_sum_variance(output_data):
         SumVariance: The calculated sum variance for each stage.
         cooling_details_dict: A dictionary containing cooling details.
     """
-    # print(f"\nSUM VARIANCE OUTPUT DATA : {output_data['stage_details']}")#, output_data["total_power"])
     HeCap = 300 # L
     FridgeCap = 6 #J
     MaxFlightTime = 35*24*3600
@@ -149,7 +146,6 @@ def get_sum_variance(output_data):
     HeLH = 21 #kJ/kg
     Cpgas = 5.5 # kJ/(kg*K)
     HeBP = 4.2 # K
-    # print(f"\nSUM VARIANCE OUTPUT DATA : {output_data['stage_details']}")#, output_data["total_power"])
     HeCap = 300 # L
     FridgeCap = 6 #J
     MaxFlightTime = 35*24*3600
@@ -192,9 +188,6 @@ def get_sum_variance(output_data):
     VCS2CoolingCap = cooling_power(VCS2_Temp, VCS2VaporTemp, loadProvidingVapor, VCS2_Efficiency)
     # SumVariance = ((VCS1CoolingCap+VCS2CoolingCap)-(output_data["total_power"]["VCS 1"]+output_data["total_power"]["VCS 2"]))**2
     SumVariance = ((VCS1CoolingCap-output_data["total_power"]["VCS 1"])**2 + (VCS2CoolingCap-output_data["total_power"]["VCS 2"])**2)**(1/2)
-    # print(f"\nVCS1 Cooling Cap : {VCS1CoolingCap} W,\nVCS1 Power       : {output_data["total_power"]["VCS 1"]},\nDifference       : {VCS1CoolingCap-output_data["total_power"]["VCS 1"]},")
-    # print(f"\nVCS2 Cooling Cap : {VCS2CoolingCap} W,\nVCS2 Power       : {output_data["total_power"]["VCS 2"]},\nDifference       : {VCS2CoolingCap-output_data["total_power"]["VCS 2"]},")
-    # print(f"Sum Variance : {SumVariance}")
     cooling_details_dict = {
         "He3Cap"                : [HeCap, "L"],
         "Total Average Load"    : [total_average_load, "W"],
@@ -252,8 +245,8 @@ def optimize_tm(components_input, stage_details_input, num_points=10):
     # Step two - calculate power
     # Step three - change temps
     # Step four - go back to step 2
-    VCS2_temps = np.linspace(200, 260, num_points)
-    VCS1_temps = np.linspace(25, 200, num_points)
+    VCS2_temps = np.linspace(100, 260, num_points)
+    VCS1_temps = np.linspace(5, 100, num_points)
     VCS2_grid, VCS1_grid = np.meshgrid(VCS2_temps, VCS1_temps) 
     SumVarArr = np.zeros_like(VCS2_grid)
     best_sum_var = 1e6
@@ -264,17 +257,12 @@ def optimize_tm(components_input, stage_details_input, num_points=10):
     i = 0
     for vcs2temp in VCS2_temps:
         j = 0
-        # print(f"\nOld Stage Details {stage_details}")
-        # print("\nInitial powers", {stage: {comp: details["Power Total (W)"] for comp, details in comps.items()} for stage, comps in components.items()})
         stage_details["VCS 2"]["lowT"] = vcs2temp        
         stage_details["VCS 1"]["highT"] = vcs2temp
         for vcs1temp in VCS1_temps:
             stage_details["VCS 1"]["lowT"] = vcs1temp
             stage_details["4K - LHe"]["highT"] = vcs1temp # Update the 4K LHe stage high temp to match VCS2 low temp
-            # print(f"\nOld powers", {stage: {comp: details["Power Total (W)"] for comp, details in comps.items()} for stage, comps in components.items()})
-            # print("\nNew Stage Details", stage_details)
             details = get_all_powers(components, stage_details)
-            # print("\nNew powers", {stage: {comp: det["Power Total (W)"] for comp, det in comps.items()} for stage, comps in details.items()})
             stage_total_power = {stage: sum(details["Power Total (W)"] for details in comps.values()) for stage, comps in details.items()}
             output_data = {
             "components": components,
@@ -286,17 +274,13 @@ def optimize_tm(components_input, stage_details_input, num_points=10):
             # hold_time_arr = np.append(hold_time_arr, cooling_dict["Cryo Hold Time"])
             if sum_var < best_sum_var:
                 best_sum_var = sum_var
-                # print(f"SUM VARIANCE : {sum_var}, BEST : {best_sum_var}")
                 optimal_vcs = {"VCS 2":vcs2temp, "VCS 1":vcs1temp}
-            # print(f"Testing -- VCS1 :{vcs1temp}, VCS2 : {vcs2temp}, \nSum Variance : {sum_var}\nHoldTime : {cooling_dict['Cryo Hold Time']}")
-            # print(f"Sum Variance : {sum_var}")
             j += 1
         i += 1
     stage_details["VCS 2"]["lowT"] = optimal_vcs["VCS 2"]        
     stage_details["VCS 1"]["highT"] = optimal_vcs["VCS 2"]
     stage_details["VCS 1"]["lowT"] = optimal_vcs["VCS 1"]
     stage_details["4K - LHe"]["highT"] = optimal_vcs["VCS 1"] # Update the 4K LHe stage high temp to match VCS2 low temp
-    # print("RESULTS OF OPTIMIZATION", optimal_vcs)
     details = get_all_powers(components, stage_details)
 
     stage_total_power = {stage: sum(details["Power Total (W)"] for details in comps.values()) for stage, comps in details.items()}
