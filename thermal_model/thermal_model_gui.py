@@ -103,6 +103,17 @@ with tabs[0]:
         if st.session_state.main_stage == []:
             st.sidebar.warning("Please add a stage to begin")
             selected_comp_type = "Stage"
+                    # Input field for naming the component or stage
+            name = st.sidebar.text_input("Name")
+
+            ############################################################
+            ############################################################
+
+            # If adding a stage, add T2 temperature
+            if selected_comp_type == "Stage":
+                low_temp = st.sidebar.number_input("Low Temperature (°K)", key="LowTemp", value=25.0, format="%.1f")
+                high_temp = st.sidebar.number_input("High Temperature (°K)", key="HighTemp", value=270.0, format="%.1f")
+
         else:
             # Select a stage to add the component to
             selected_stage_name = st.sidebar.selectbox("Select Stage to Add Component",
@@ -110,6 +121,16 @@ with tabs[0]:
             component_type_list = ["Stage", "Standard", "A/L", "Coax", "Power per Part"]
             selected_comp_type = st.sidebar.selectbox("Select Component Type", component_type_list)
         
+            # Input field for naming the component or stage
+            name = st.sidebar.text_input("Name")
+
+            ############################################################
+            ############################################################
+
+            # If adding a stage, add T2 temperature
+            if selected_comp_type == "Stage":
+                low_temp = st.sidebar.number_input("Low Temperature (°K)", key="LowTemp", value=25.0, format="%.1f")
+                high_temp = st.sidebar.number_input("High Temperature (°K)", key="HighTemp", value=270.0, format="%.1f")
             
             # Dictionary to hold component properties
             component_properties = {}
@@ -181,6 +202,7 @@ with tabs[0]:
                 else:
                     component_properties["Core Fit Choice"] = None
 
+
                 component_properties["Case OD (m)"] = st.sidebar.number_input("Case OD (m)", value=0.0, format="%.3f")
                 component_properties["Insulator OD (m)"] = st.sidebar.number_input("Insulator OD (m)", value=0.0, format="%.3f")
                 component_properties["Core OD (m)"] = st.sidebar.number_input("Core OD (m)", value=0.0, format="%.3f")
@@ -197,18 +219,12 @@ with tabs[0]:
                 component_properties["Time On (h/d)"] = st.sidebar.number_input("Time On (h/d)", value=0.0, format="%.1f", max_value=24.0, step = 0.5)
                 component_properties["Time Off (h/d)"] = st.sidebar.number_input("Time Off (h/d)", value=0.0, format="%.1f", max_value=24.0, step = 0.5)
 
+            if "4K" in selected_stage_name:
+                component_properties["Providing Vapor"] = st.sidebar.checkbox("Providing Vapor", value=True)
+            else:
+                component_properties["Providing Vapor"] = st.sidebar.checkbox("Providing Vapor", value=False)
         ############################################################
         ############################################################
-        # Input field for naming the component or stage
-        name = st.sidebar.text_input("Name")
-
-        ############################################################
-        ############################################################
-
-        # If adding a stage, add T2 temperature
-        if selected_comp_type == "Stage":
-            low_temp = st.sidebar.number_input("Low Temperature (°K)", key="LowTemp", value=25.0, format="%.1f")
-            high_temp = st.sidebar.number_input("High Temperature (°K)", key="HighTemp", value=270.0, format="%.1f")
 
 
         # Button to add a new component or stage
@@ -318,15 +334,6 @@ with tabs[0]:
         st.session_state.main_stage.stages = loaded_stages[1:]
         st.sidebar.success("JSON loaded successfully!")
 
-    # Button to clear everything
-    # with stylable_container(
-    #     "green",
-    #     css_styles="""
-    #     sidebar.button {
-    #         background-color: #00FF00;
-    #         color: black;
-    #     }""",
-    # ):
     clear_button = st.sidebar.button("Clear All", type="primary")
     
     if clear_button:
@@ -345,42 +352,16 @@ with tabs[0]:
             css_styles="""
                 {
                     background-color: %s;
-                    border: 1px solid %s;
+                    border: 0px solid %s;
                     border-radius: 0.5rem;
-                    padding: calc(1em - 1px)
+                    padding: 1em 1em 2em 1em; /* Top, Right, Bottom, Left */
                 }
                 """ % (get_color(), get_dark_color()),
-        ):
-                
-            # st.write(st.session_state.editing_stage_properties)
+        ): 
             if stage.name not in st.session_state.editing_stage_properties:
                 st.session_state.editing_stage_properties[stage.name] = False
             with st.expander(f"{stage.name}", expanded=False):
                 # Display stage properties as editable fields
-                # ##############################################################################################
-                # EDIT FUNCTION THAT IS NOT CURRENTLY WORKING
-                # ##############################################################################################
-                # if st.button(f"Edit {stage.name}", key=f"edit_{stage.name}"):
-                #     st.session_state.editing_stage_properties[stage.name] = True
-                #     # st.experimental_rerun()  # Trigger re-render
-                # if st.session_state.get("editing_stage_properties")[stage.name]:
-                #     new_high_temp = st.number_input("High Temperature (°K)", value=float(stage.high_temp), format="%.1f", key=f"high_temp_{stage.name}")
-                #     new_low_temp = st.number_input("Low Temperature (°K)", value=float(stage.low_temp), format="%.1f", key=f"low_temp_{stage.name}")
-                #     # new_power = st.number_input("Power (W)", value=float(stage.power), format="%.1f", key=f"power_{stage.name}")
-                #     # st.write("PRE", stage.low_temp, stage.high_temp, stage.power)
-                #     if st.button("Save Changes", key=f"save_{stage.name}"):                  
-                #         stage.low_temp = new_low_temp
-                #         stage.high_temp = new_high_temp
-                #         # stage.power = new_power
-                        
-                #         # st.write("MID", stage.low_temp, stage.high_temp, stage.power)
-                #         st.success(f"Changes saved for {stage.name}!")
-                #         st.session_state.editing_stage_properties[stage.name] = False
-                #         # st.experimental_rerun()  # Trigger re-render
-                # ##############################################################################################
-                # EDIT FUNCTION THAT IS NOT CURRENTLY WORKING
-                # ##############################################################################################
-
                 stage_df = pd.DataFrame([
                                         ["High Temp", stage.high_temp],
                                         ["Low Temp", stage.low_temp], 
@@ -427,13 +408,20 @@ with tabs[0]:
                             if component.properties:
                                 df = pd.DataFrame(
                                     [
-                                        {"Property": key, "Value": f"{value:.3e}" if isinstance(value, (int, float)) else value}
+                                        {
+                                            "Property": key,
+                                            "Value": (
+                                                f"{value:.3e}" if isinstance(value, (int, float)) and not isinstance(value, bool)
+                                                else ("True" if value is True else "False") if isinstance(value, bool)
+                                                else value
+                                            )
+                                        }
                                         for key, value in component.properties.items()
                                     ]
                                 )
-                                # st.markdown(df.to_html(index=False), unsafe_allow_html=True)
                                 st.dataframe(df, use_container_width=True, hide_index=True)
                             st.markdown("</div>", unsafe_allow_html=True)
+
                         st.markdown("</div>", unsafe_allow_html=True)
                         j += 1
     # Define Stages
@@ -562,9 +550,19 @@ with tabs[2]:
             # Display selected component details
             if selected_component:
                 st.subheader(f"Details for {selected_component.name}")
+
                 component_df = pd.DataFrame(
-                    list(selected_component.properties.items()),
-                    columns=["Property", "Value"]
+                    [
+                        {
+                            "Property": key,
+                            "Value": (
+                                f"{value:.3e}" if isinstance(value, (int, float)) and not isinstance(value, bool)
+                                else ("True" if value is True else "False") if isinstance(value, bool)
+                                else value
+                            )
+                        }
+                        for key, value in selected_component.properties.items()
+                    ]
                 )
                 st.dataframe(component_df, use_container_width=True, hide_index=True)
 
@@ -574,7 +572,6 @@ with tabs[2]:
                     mid_col.pyplot(int_fig, use_container_width=True)
                 except:
                     st.warning("Integral plot not available for this component type.")
-
         # Sum Var plot
         left_col, mid_col, right_col = st.columns([0.2, 0.6, 0.2])
         try:
@@ -589,7 +586,6 @@ with tabs[2]:
             cmap = mpl.colors.LinearSegmentedColormap.from_list(
                 'Custom cmap', cmaplist, cmap.N)
 
-            
             # define the bins and normalize
             bounds = np.linspace(-10, 1, 20)
             norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
@@ -597,11 +593,6 @@ with tabs[2]:
 
             [VCS2grid, VCS1grid, SumVarArr] = st.session_state.optimized
             hm = ax.imshow(np.log(SumVarArr), extent=(VCS1grid.min(), VCS1grid.max(), VCS2grid.min(), VCS2grid.max()), origin='lower', cmap="Blues_r", aspect='auto')
-
-
-
-
-
 
             fig.colorbar(hm, label='ln(Sum Variance)')#, cmap=cmap, norm=norm, spacing="proportional", ticks=bounds, boundaries=bounds)#, ticks=np.round(np.linspace(SumVarArr.min(), SumVarArr.max(), 5)), format='%.2f')
             ax.set_ylabel('VCS2 temperature')

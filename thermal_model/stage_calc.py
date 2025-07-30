@@ -48,8 +48,7 @@ def calculate_power_function(details, stage_temps, A_L = False):
     if "Interpolate" in details and details["Interpolate"]:
         interp_exists, valid_range = find_interpolation(mat) # Check if interpolation file exists
         if lowT < valid_range[0] or highT > valid_range[1]:
-            print(f"ERROR: Interpolation range for {mat} is {valid_range}, but requested range is {lowT} to {highT}.")
-            print("Using default material fit instead.")
+            print(f"ERROR: Interpolation range for {mat} is {valid_range}, but requested range is {lowT} to {highT}. Using default material fit instead.")
             ConIntQuad = get_conductivity_integral(lowT, highT, mat, verbose=False)
         else:
             ConIntQuad = get_interpolation_integral(lowT, highT, mat)
@@ -172,10 +171,21 @@ def get_sum_variance(output_data):
     He3HoldTime = (FridgeCap/mk300Load)/3600
 
     total_average_load = He3Load + RecycleEnergy/(He3HoldTime*3600)
-    if "LNA" in output_data["components"]["4K - Transient"].keys() and "Motor Axles" in output_data["components"]["4K - Transient"].keys():
-        loadProvidingVapor = output_data["total_power"]["4K - LHe"] + output_data["components"]["4K - Transient"]["LNA"]["Power Total (W)"] + output_data["components"]["4K - Transient"]["Motor Axles"]["Power Total (W)"]
-    else:
-        loadProvidingVapor = output_data["total_power"]["4K - LHe"] + output_data["total_power"]["4K - Transient"]
+    # if "LNA" in output_data["components"]["4K - Transient"].keys() and "Motor Axles" in output_data["components"]["4K - Transient"].keys():
+    #     loadProvidingVapor = output_data["total_power"]["4K - LHe"] + output_data["components"]["4K - Transient"]["LNA"]["Power Total (W)"] + output_data["components"]["4K - Transient"]["Motor Axles"]["Power Total (W)"]
+    # else:
+    #     loadProvidingVapor = output_data["total_power"]["4K - LHe"] + output_data["total_power"]["4K - Transient"]
+
+    loadProvidingVapor = 0.0
+    for comp_name, comp_details in output_data["components"]["4K - LHe"].items():
+        if "Providing Vapor" in comp_details and comp_details["Providing Vapor"]:
+            if comp_details.get("Providing Vapor", False):
+                loadProvidingVapor += comp_details.get("Power Total (W)", 0.0)
+    for comp_name, comp_details in output_data["components"]["4K - Transient"].items():
+        if "Providing Vapor" in comp_details and comp_details["Providing Vapor"]:
+            if comp_details.get("Providing Vapor", False):
+                loadProvidingVapor += comp_details.get("Power Total (W)", 0.0)
+    print(f"Load Providing Vapor: {loadProvidingVapor} W")
         
     
     LitersPCycle = (total_average_load*He3HoldTime*3.6)/(HeRho*HeLH)

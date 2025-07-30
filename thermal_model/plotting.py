@@ -41,12 +41,9 @@ def plot_integral(selected_component, stage):
         tc_file_date    = exist_files[0][-12:-4]
 
         material_of_interest = selected_component.properties["Material"]
-        print(material_of_interest)
         TCdata = np.loadtxt(os.path.join(cmr_path, "thermal_conductivity", "lib", material_of_interest, "all_fits.csv"), dtype=str, delimiter=',') # imports compilation file csv
-        print(TCdata)
         mat_parameters = get_parameters(TCdata, selected_component.properties["Fit Choice"])
         func_type = get_func_type(mat_parameters["fit_type"])
-        print(func_type)
         fit_range = mat_parameters["fit_range"]
 
         # Let's make our plotting range the listed fit range
@@ -59,9 +56,7 @@ def plot_integral(selected_component, stage):
                     hatch="////", alpha = 0.5, edgecolor = 'b', facecolor="w",
                     label="Integration Area")
     else:
-        print("PLOT Using interpolation for", selected_component.name)
         interp_func = get_interpolation(os.path.join(path_to_mat_lib, selected_component.properties["Material"]))
-        print(interp_func)
         T_range = np.linspace(interp_func.x[0], interp_func.x[-1], 1000)
         y_vals = interp_func(T_range)
 
