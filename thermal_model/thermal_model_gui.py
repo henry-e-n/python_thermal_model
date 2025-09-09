@@ -5,7 +5,7 @@ import random, os, sys
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as c
-import json
+import json, pickle
 import numpy as np
 from stage_calc import *
 import plotly.express as px
@@ -92,10 +92,17 @@ with tabs[0]:
     # Select the type of component you want to add
     
     def get_material_fits(material):
+        # Load the material class from the material pkl file
+        with open(os.path.join(path_to_mat_lib, material, f"material.pkl"), 'rb') as f:
+            material_obj = pickle.load(f)
+        fits_list = [fit.name for fit in material_obj.fits]
+        print(fits_list)
+
         all_fits_file = os.path.join(path_to_mat_lib, material, "all_fits.csv")
         if os.path.exists(all_fits_file):
             fits_data = np.loadtxt(all_fits_file, dtype=str, delimiter=',')
             fits_dict = {row[0]: row[1:] for row in fits_data[1:]}
+            print(fits_dict)
             return fits_dict
         
               
