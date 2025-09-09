@@ -45,7 +45,10 @@ def random_color(value = 200):
     return c.to_hex(cmap(370/value))
 
 def get_color():
-    return "#f7f7ff" #"#fff5f5"
+    if st.context.theme.type == 'light':
+        return "#f7f7ff" #"#fff5f5"
+    else:
+        return "#271d42" # "#4d3e2b"
 def get_dark_color():
     return "#6d6bff" #"#ffa1a1"
 
@@ -91,19 +94,14 @@ with tabs[0]:
     
     # Select the type of component you want to add
     
-    def get_material_fits(material):
+    def get_material_fit_names(mat_name):
         # Load the material class from the material pkl file
-        with open(os.path.join(path_to_mat_lib, material, f"material.pkl"), 'rb') as f:
+        with open(os.path.join(path_to_mat_lib, mat_name, f"material.pkl"), 'rb') as f:
             material_obj = pickle.load(f)
         fits_list = [fit.name for fit in material_obj.fits]
-        print(fits_list)
-
-        all_fits_file = os.path.join(path_to_mat_lib, material, "all_fits.csv")
-        if os.path.exists(all_fits_file):
-            fits_data = np.loadtxt(all_fits_file, dtype=str, delimiter=',')
-            fits_dict = {row[0]: row[1:] for row in fits_data[1:]}
-            print(fits_dict)
-            return fits_dict
+        all_fits_file = os.path.join(path_to_mat_lib, mat_name, f"{mat_name}_fits.csv")
+        
+        return fits_list
         
               
     def sidebar_inputs():
@@ -146,11 +144,11 @@ with tabs[0]:
                 # Add input fields for Standard component properties
                 component_properties["Type"] = "Standard"
                 component_properties["Material"] = st.sidebar.selectbox("Material", mat_list)
-                has_interpolation, valid_range = find_interpolation(component_properties["Material"]) # Searches for interpolation file, returns True if it exists
+                has_interpolation, valid_range, interp_func = find_interpolation(component_properties["Material"]) # Searches for interpolation file, returns True if it exists
                 if has_interpolation: # If interpolation file exists
                     component_properties["Interpolate"] = st.sidebar.checkbox(f"Use Interpolation in range :\n{valid_range[0]} K - {valid_range[1]} K", value=True) # Provide checkbox to use interpolation
                 if not component_properties["Interpolate"]: # If interpolation is not selected, search for available fits
-                    component_properties["Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fits(component_properties["Material"]).keys())
+                    component_properties["Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fit_names(component_properties["Material"]))
                 else:
                     component_properties["Fit Choice"] = None
                 component_properties["OD (m)"] = st.sidebar.number_input("OD (m)", value=0.0, format="%.3f")
@@ -162,11 +160,11 @@ with tabs[0]:
                 # Add input fields for A/L component properties
                 component_properties["Type"] = "A/L"
                 component_properties["Material"] = st.sidebar.selectbox("Material", mat_list)
-                has_interpolation, valid_range = find_interpolation(component_properties["Material"]) # Searches for interpolation file, returns True if it exists
+                has_interpolation, valid_range , interp_func = find_interpolation(component_properties["Material"]) # Searches for interpolation file, returns True if it exists
                 if has_interpolation: # If interpolation file exists
                     component_properties["Interpolate"] = st.sidebar.checkbox(f"Use Interpolation in range :\n{valid_range[0]} K - {valid_range[1]} K", value=True) # Provide checkbox to use interpolation
                 if not component_properties["Interpolate"]: # If interpolation is not selected, search for available fits
-                    component_properties["Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fits(component_properties["Material"]).keys())
+                    component_properties["Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fit_names(component_properties["Material"]))
                 else:
                     component_properties["Fit Choice"] = None
                 component_properties["A/L (m)"] = st.sidebar.number_input("A/L (m)", value=0.0, format="%.3f")
@@ -177,35 +175,35 @@ with tabs[0]:
                 # Add input fields for Coax component properties
                 component_properties["Type"] = "Coax"
                 component_properties["Casing Material"] = st.sidebar.selectbox("Casing Material", mat_list)
-                has_interpolation, valid_range = find_interpolation(component_properties["Casing Material"]) # Searches for interpolation file, returns True if it exists
+                has_interpolation, valid_range , interp_func = find_interpolation(component_properties["Casing Material"]) # Searches for interpolation file, returns True if it exists
                 if has_interpolation: # If interpolation file exists
                     component_properties["Casing Interpolate"] = st.sidebar.checkbox(f"Use Interpolation for Casing material in range :\n{valid_range[0]} K - {valid_range[1]} K", value=True) # Provide checkbox to use interpolation
                 else:
                     component_properties["Casing Interpolate"] = False
                 if not component_properties["Casing Interpolate"]: # If interpolation is not selected, search for available fits
-                    component_properties["Casing Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fits(component_properties["Casing Material"]).keys())
+                    component_properties["Casing Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fit_names(component_properties["Casing Material"]))
                 else:
                     component_properties["Casing Fit Choice"] = None
 
                 component_properties["Insulator Material"] = st.sidebar.selectbox("Insulator Material", mat_list)
-                has_interpolation, valid_range = find_interpolation(component_properties["Insulator Material"]) # Searches for interpolation file, returns True if it exists
+                has_interpolation, valid_range , interp_func = find_interpolation(component_properties["Insulator Material"]) # Searches for interpolation file, returns True if it exists
                 if has_interpolation: # If interpolation file exists
                     component_properties["Insulator Interpolate"] = st.sidebar.checkbox(f"Use Interpolation for Insulator material in range :\n{valid_range[0]} K - {valid_range[1]} K", value=True) # Provide checkbox to use interpolation
                 else:
                     component_properties["Insulator Interpolate"] = False
                 if not component_properties["Insulator Interpolate"]: # If interpolation is not selected, search for available fits
-                    component_properties["Insulator Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fits(component_properties["Insulator Material"]).keys())
+                    component_properties["Insulator Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fit_names(component_properties["Insulator Material"]))
                 else:
                     component_properties["Insulator Fit Choice"] = None
 
                 component_properties["Core Material"] = st.sidebar.selectbox("Core Material", mat_list)
-                has_interpolation, valid_range = find_interpolation(component_properties["Core Material"]) # Searches for interpolation file, returns True if it exists
+                has_interpolation, valid_range, interp_func = find_interpolation(component_properties["Core Material"]) # Searches for interpolation file, returns True if it exists
                 if has_interpolation: # If interpolation file exists
                     component_properties["Core Interpolate"] = st.sidebar.checkbox(f"Use Interpolation for Core material in range :\n{valid_range[0]} K - {valid_range[1]} K", value=True) # Provide checkbox to use interpolation
                 else:
                     component_properties["Core Interpolate"] = False
                 if not component_properties["Core Interpolate"]: # If interpolation is not selected, search for available fits
-                    component_properties["Core Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fits(component_properties["Core Material"]).keys())
+                    component_properties["Core Fit Choice"] = st.sidebar.selectbox("Fit Choice", get_material_fit_names(component_properties["Core Material"]))
                 else:
                     component_properties["Core Fit Choice"] = None
 

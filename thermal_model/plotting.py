@@ -11,7 +11,7 @@ for path in [cmr_path]:
     if path not in sys.path:
         sys.path.append(path)
 
-from thermal_conductivity.tc_tools import *
+# from thermal_conductivity.tc_tools import *
 from thermal_conductivity.tc_utils import *
 from thermal_conductivity.fit_types import *
 

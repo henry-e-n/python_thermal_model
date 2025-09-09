@@ -5,14 +5,16 @@
 import numpy as np
 import sys, os, csv, json
 import matplotlib.pyplot as plt
+import pickle
 
 from global_var import cmr_path, path_to_mat_lib
+from astropy import units as u
 
 for path in [cmr_path]:
     if path not in sys.path:
         sys.path.append(path)
 
-from thermal_conductivity.tc_tools import *
+# from thermal_conductivity.tc_tools import *
 from thermal_conductivity.tc_utils import *
 from thermal_conductivity.fit_types import *
 
@@ -46,14 +48,18 @@ def calculate_power_function(details, stage_temps, A_L = False):
         A_L_val = details["A/L (m)"]
 
     if "Interpolate" in details and details["Interpolate"]:
-        interp_exists, valid_range = find_interpolation(mat) # Check if interpolation file exists
+        interp_exists, valid_range, interp_func = find_interpolation(mat) # Check if interpolation file exists
         if lowT < valid_range[0] or highT > valid_range[1]:
             print(f"ERROR: Interpolation range for {mat} is {valid_range}, but requested range is {lowT} to {highT}. Using default material fit instead.")
-            ConIntQuad = get_conductivity_integral(lowT, highT, mat, verbose=False)
+            fits_obj = get_material_fits(mat)
+            first_fit = fits_obj[0]
+            ConIntQuad = first_fit.tc_integral(lowT*u.K, highT*u.K)[0].value
         else:
             ConIntQuad = get_interpolation_integral(lowT, highT, mat)
     else:
-        ConIntQuad = get_conductivity_integral(lowT, highT, mat, specify_fit=details["Fit Choice"], verbose=False)
+        fit_obj = get_fit_by_name(mat, details["Fit Choice"])
+        ConIntQuad = fit_obj.tc_integral(lowT*u.K, highT*u.K)[0].value
+    print(ConIntQuad)
     
     ppu = A_L_val*ConIntQuad
 
@@ -329,11 +335,16 @@ def find_interpolation(material):
     Returns:
         bool: True if the interpolation file exists, False otherwise.
     """
-    interp_file = os.path.join(path_to_mat_lib, material, "interpolation.pkl")
-    interp_func = get_interpolation(os.path.join(path_to_mat_lib, material))
-    valid_range = [round(float(interp_func.x[0]), 2), round(float(interp_func.x[-1]), 2)]
-    if os.path.exists(interp_file):
-        return True, valid_range
+    # Load the material object from the specified path
+    mat_file = os.path.join(path_to_mat_lib, material, "material.pkl")
+    with open(mat_file, 'rb') as f:
+        mat = pickle.load(f)
+    print(mat)
+    if hasattr(mat, 'interpolate_function'):
+        interp_func = mat.interpolate_function
+        # interp_func = get_interpolation(os.path.join(path_to_mat_lib, material))
+        valid_range = [round(float(interp_func.x[0]), 2), round(float(interp_func.x[-1]), 2)]
+        return True, valid_range, interp_func
     else:
         return False, None
     
