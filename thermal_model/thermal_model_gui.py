@@ -45,7 +45,7 @@ def random_color(value = 200):
     return c.to_hex(cmap(370/value))
 
 def get_color():
-    if st.context.theme.type == 'light':
+    if True: #st.get_config("theme.base") == "light":
         return "#f7f7ff" #"#fff5f5"
     else:
         return "#271d42" # "#4d3e2b"

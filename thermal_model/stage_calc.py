@@ -49,13 +49,16 @@ def calculate_power_function(details, stage_temps, A_L = False):
 
     if "Interpolate" in details and details["Interpolate"]:
         interp_exists, valid_range, interp_func = find_interpolation(mat) # Check if interpolation file exists
-        if lowT < valid_range[0] or highT > valid_range[1]:
-            print(f"ERROR: Interpolation range for {mat} is {valid_range}, but requested range is {lowT} to {highT}. Using default material fit instead.")
-            fits_obj = get_material_fits(mat)
-            first_fit = fits_obj[0]
-            ConIntQuad = first_fit.tc_integral(lowT*u.K, highT*u.K)[0].value
+        if interp_exists:
+            if lowT < valid_range[0] or highT > valid_range[1]:
+                print(f"ERROR: Interpolation range for {mat} is {valid_range}, but requested range is {lowT} to {highT}. Using default material fit instead.")
+                fits_obj = get_material_fits(mat)
+                first_fit = fits_obj[0]
+                ConIntQuad = first_fit.tc_integral(lowT*u.K, highT*u.K)[0].value
+            else:
+                ConIntQuad = get_interpolation_integral(lowT, highT, mat)
         else:
-            ConIntQuad = get_interpolation_integral(lowT, highT, mat)
+            st.warning(f"WARNING: No interpolation function found for {mat}.")
     else:
         fit_obj = get_fit_by_name(mat, details["Fit Choice"])
         ConIntQuad = fit_obj.tc_integral(lowT*u.K, highT*u.K)[0].value
@@ -342,11 +345,14 @@ def find_interpolation(material):
     print(mat)
     if hasattr(mat, 'interpolate_function'):
         interp_func = mat.interpolate_function
+        print(interp_func)
+        if interp_func == None:
+            return False, None, None
         # interp_func = get_interpolation(os.path.join(path_to_mat_lib, material))
         valid_range = [round(float(interp_func.x[0]), 2), round(float(interp_func.x[-1]), 2)]
         return True, valid_range, interp_func
     else:
-        return False, None
+        return False, None, None
     
 def load_thermal_model(json_path):
     with open(json_path, 'r') as f:
