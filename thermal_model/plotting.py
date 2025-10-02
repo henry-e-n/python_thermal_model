@@ -36,27 +36,16 @@ def plot_integral(selected_component, stage):
     
     fig, ax = plt.subplots()
 
+    mat = get_material(selected_component.properties["Material"])
+    print("HERE")
     if not selected_component.properties["Interpolate"]:
-        exist_files     = [file for file in all_files if file.startswith("tc_fullrepo")]
-        tc_file_date    = exist_files[0][-12:-4]
-
-        material_of_interest = selected_component.properties["Material"]
-        TCdata = np.loadtxt(os.path.join(cmr_path, "thermal_conductivity", "lib", material_of_interest, "all_fits.csv"), dtype=str, delimiter=',') # imports compilation file csv
-        mat_parameters = get_parameters(TCdata, selected_component.properties["Fit Choice"])
-        func_type = get_func_type(mat_parameters["fit_type"])
-        fit_range = mat_parameters["fit_range"]
-
-        # Let's make our plotting range the listed fit range
-        T_range = np.linspace(fit_range[0], fit_range[1], 1000)
-
-        # Now let's use the fit to get the thermal conductivity values over the range
-        # Luckily, every function type is defined in such a way to readily accept the parameter dictionary as it was defined above
-        y_vals = func_type(T_range, mat_parameters)
-        ax.fill_between(fill_between_range, np.zeros(len(fill_between_range)), func_type(fill_between_range, mat_parameters),
+        fit_obj = get_fit_by_name(selected_component.properties["Material"], selected_component.properties["Fit Choice"])
+        fit_obj.plot()
+        ax.fill_between(fill_between_range, np.zeros(len(fill_between_range)), fit_obj.function()(fill_between_range, *fit_obj.parameters),
                     hatch="////", alpha = 0.5, edgecolor = 'b', facecolor="w",
                     label="Integration Area")
     else:
-        interp_func = get_interpolation(os.path.join(path_to_mat_lib, selected_component.properties["Material"]))
+        interp_func = mat.interpolate_function
         T_range = np.linspace(interp_func.x[0], interp_func.x[-1], 1000)
         y_vals = interp_func(T_range)
 
@@ -64,7 +53,7 @@ def plot_integral(selected_component, stage):
                     hatch="////", alpha = 0.5, edgecolor = 'b', facecolor="w",
                     label="Integration Area")
 
-    ax.plot(T_range, y_vals, color="b")
+        ax.plot(T_range, y_vals, color="b")
     
     ax.semilogy()
     ax.semilogx()
@@ -73,7 +62,6 @@ def plot_integral(selected_component, stage):
     ax.set_xlabel("T [K]")
     ax.set_ylabel("Thermal Conductivity : k [W/m/K]")
     return fig, ax
-
 #%% Plot Pie Chart
 def plot_pie_chart(stage, streamlit=True):
     
