@@ -22,6 +22,12 @@ from plotting import *
 abspath = os.path.abspath(__file__)
 file_path = os.path.dirname(abspath)
 
+log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
+if not os.path.exists(log_file_path):
+    with open(log_file_path, 'w') as log_file:
+        log_file.write("Thermal Model Log File\n")
+        log_file.write("======================\n\n")
+
 def default_page_load():
     st.set_page_config("Interactive Thermal Model GUI", page_icon=":thermometer:", layout="wide")
     HORIZONTAL_RED = f"{file_path}{os.sep}static{os.sep}blast-logo.png"
@@ -30,9 +36,13 @@ def default_page_load():
     
 default_page_load()
 
+def log_to_file(message):
+    with open(log_file_path, 'a') as log_file:
+        log_file.write(f"{message}\n")
+    return
 
 if not os.path.exists(cmr_path):
-    print(f"ERROR : path to cryogenics materials properties repository is not found {cmr_path}")
+    log_to_file(f"ERROR : path to cryogenics materials properties repository is not found {cmr_path}")
     exit()
 
 
@@ -80,7 +90,7 @@ title_area, logo_area = st.columns(2)
 title_area.title("Interactive Thermal Model GUI")
 logo_area.image(f"{file_path}{os.sep}static{os.sep}blast-logo.png", width=200)  # Display the logo in the main body
 
-tabs = st.tabs(["Component Modeling", "Result Tables", "Plots", "About"])
+tabs = st.tabs(["Component Modeling", "Result Tables", "Plots", "About", "Log"])
 
 
 # Main Page Content
@@ -254,7 +264,15 @@ with tabs[0]:
                         selected_stage_temps["highT"] = selected_stage.high_temp
                         component_properties["Power per Part (W)"] = calculate_power_function(component_properties, selected_stage_temps, A_L = False)
                     new_component = Component(name, properties=component_properties)
-                    selected_stage.add_component(new_component)
+                    # list the names of the components currently in the stage
+                    component_names = [comp.name for comp in selected_stage.components]
+                    if name in component_names:
+                        # log the warning
+                        log_to_file(f"WARNING: Component '{name}' already exists in Stage '{selected_stage_name}'. Please choose a different name.")
+                        st.warning(f"Component '{name}' already exists in '{selected_stage_name}'. Please choose a different name.")
+                    else:
+                        selected_stage.add_component(new_component)
+                    
                     st.sidebar.success(f"Component '{name}' added to '{selected_stage_name}'!")
             st.rerun() 
     
@@ -264,6 +282,7 @@ with tabs[0]:
         substages = [sub_stage for sub_stage in st.session_state.main_stage.stages if sub_stage.name != st.session_state.main_stage.name]
         all_stages = [st.session_state.main_stage] + substages
     except AttributeError:
+        log_to_file("No stages available. Please add a stage to begin.")
         st.warning("No stages available. Please add a stage to begin.")
         substages = []
         all_stages = []
@@ -606,6 +625,7 @@ with tabs[2]:
             plt.savefig(f"{file_path}{os.sep}Screenshots{os.sep}heatmap.png", dpi=600, bbox_inches='tight')
             mid_col.pyplot(fig, use_container_width=True)
         except Exception as e:
+            log_to_file(f"Error {e} : Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
             st.warning(f"Error {e} Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
 
 with tabs[3]:
@@ -632,3 +652,12 @@ with tabs[3]:
         If you have any questions, suggestions, or issues, please feel free to reach out:
         
         Henry Nachman (henry.nachman@utexas.edu)""")
+
+with tabs[4]:
+    st.header("Log")
+    try:
+        with open(log_file_path, 'r') as log_file:
+            log_contents = log_file.read()
+            st.text_area("Log Contents", log_contents, height=400)
+    except FileNotFoundError:
+        st.warning("Log file not found.")

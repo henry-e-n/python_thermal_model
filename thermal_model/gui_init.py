@@ -29,3 +29,8 @@ def init_gui():
     # Run the Streamlit app
     print("Starting the Streamlit GUI...")
     os.system(f"streamlit run {gui_path}")
+
+if __name__ == "__main__":
+    # config_path = define_CMR_path()
+    # print(f"CMR path saved to: {config_path}")
+    init_gui()

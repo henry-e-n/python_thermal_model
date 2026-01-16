@@ -65,7 +65,6 @@ def calculate_power_function(details, stage_temps, A_L = False):
         print("Using fit for material...", mat, details["Fit Choice"])
         fit_obj = get_fit_by_name(mat, details["Fit Choice"])
         ConIntQuad = fit_obj.tc_integral(lowT*u.K, highT*u.K)[0].value
-    print(ConIntQuad)
     
     ppu = A_L_val*ConIntQuad
 
@@ -345,10 +344,8 @@ def find_interpolation(material):
     mat_file = os.path.join(path_to_mat_lib, material, "material.pkl")
     with open(mat_file, 'rb') as f:
         mat = pickle.load(f)
-    print(mat)
     if hasattr(mat, 'interpolate_function'):
         interp_func = mat.interpolate_function
-        print(interp_func)
         if interp_func == None:
             return False, None, None
         # interp_func = get_interpolation(os.path.join(path_to_mat_lib, material))
