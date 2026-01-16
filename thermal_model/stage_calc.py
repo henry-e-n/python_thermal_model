@@ -19,6 +19,7 @@ from thermal_conductivity.tc_utils import *
 from thermal_conductivity.fit_types import *
 
 def calculate_power_function(details, stage_temps, A_L = False):
+    print("\nCalculating power function for component...")
     """Calculate the power function for a given component.
 
     Args:
@@ -48,6 +49,7 @@ def calculate_power_function(details, stage_temps, A_L = False):
         A_L_val = details["A/L (m)"]
 
     if "Interpolate" in details and details["Interpolate"]:
+        print("Using interpolation for material...")
         interp_exists, valid_range, interp_func = find_interpolation(mat) # Check if interpolation file exists
         if interp_exists:
             if lowT < valid_range[0] or highT > valid_range[1]:
@@ -60,6 +62,7 @@ def calculate_power_function(details, stage_temps, A_L = False):
         else:
             st.warning(f"WARNING: No interpolation function found for {mat}.")
     else:
+        print("Using fit for material...", mat, details["Fit Choice"])
         fit_obj = get_fit_by_name(mat, details["Fit Choice"])
         ConIntQuad = fit_obj.tc_integral(lowT*u.K, highT*u.K)[0].value
     print(ConIntQuad)

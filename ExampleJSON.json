@@ -1,0 +1,68 @@
+{
+    "components": {
+        "VCS 2": {
+            "Part 1": {
+                "Type": "Standard",
+                "Material": "Aluminum",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 0.03,
+                "ID (m)": 0.01,
+                "Length (m)": 0.03,
+                "Number": 1,
+                "Providing Vapor": false,
+                "Power per Part (W)": 770.4361834957331,
+                "Power Total (W)": 770.4361834957331
+            }
+        },
+        "VCS1": {
+            "Part 1": {
+                "Type": "Standard",
+                "Material": "Stainless_Steel",
+                "Interpolate": false,
+                "Fit Choice": "Stainless_Steel_304_data",
+                "OD (m)": 0.03,
+                "ID (m)": 0.01,
+                "Length (m)": 0.03,
+                "Number": 1,
+                "Providing Vapor": false,
+                "Power per Part (W)": 19.203350666394645,
+                "Power Total (W)": 19.203350666394645
+            }
+        },
+        "4K": {
+            "Part 1": {
+                "Type": "Standard",
+                "Material": "Stainless_Steel",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 0.03,
+                "ID (m)": 0.01,
+                "Length (m)": 0.03,
+                "Number": 1,
+                "Providing Vapor": true,
+                "Power per Part (W)": 3.58355880485357,
+                "Power Total (W)": 3.58355880485357
+            }
+        }
+    },
+    "stage_details": {
+        "VCS 2": {
+            "lowT": 155.0,
+            "highT": 300.0
+        },
+        "VCS1": {
+            "lowT": 55.0,
+            "highT": 155.0
+        },
+        "4K": {
+            "lowT": 4.0,
+            "highT": 55.0
+        }
+    },
+    "total_power": {
+        "VCS 2": 770.4361834957331,
+        "VCS1": 19.203350666394645,
+        "4K": 3.58355880485357
+    }
+}
