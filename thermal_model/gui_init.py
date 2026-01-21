@@ -27,6 +27,13 @@ def init_gui():
     if not os.path.exists(gui_path):
         raise FileNotFoundError(f"GUI file {gui_path} does not exist.")
     # Run the Streamlit app
+    log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
+    with open(log_file_path, 'w') as log_file:
+        log_file.write("Thermal Model Log File\n")
+        log_file.write("======================\n\n")
+
+    open(log_file_path, 'w').close()
+
     print("Starting the Streamlit GUI...")
     os.system(f"streamlit run {gui_path}")
 

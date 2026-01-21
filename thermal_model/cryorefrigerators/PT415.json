@@ -1,0 +1,21 @@
+{
+    "PT415" : {
+        "name": "PT415",
+        "type": "cryorefrigerator",
+        "manufacturer": "Cryomech",
+        "specifications": {
+            "cooling_capacity_watts": {
+            "4.2K" : 1.5,
+            "45K": 40
+            },
+            "base_temperature_K" : 2.8,
+            "power_consumption_60Hz_kW": 10.7,
+            "power_consumption_50Hz_kW": 9.2,
+            "dimensions_mm": {
+            "height": 1200,
+            "diameter": 400
+            },
+            "weight_kg": 150
+        }
+    }
+}

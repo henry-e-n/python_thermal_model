@@ -1,4 +1,29 @@
 # Author : Henry Nachman
+"""
+Adjust the thermal model results based on the outputs of the filter transfer model.
+This script performs the following tasks:
+1. Loads the thermal model configuration from a JSON file.
+2. Reads the thermalization results from a configuration file.
+3. Optimizes the thermal model using the loaded components and stage details.
+4. Estimates the hold time based on the optimization results.
+5. Updates the power values of optical load components based on the thermalization results.
+6. Saves the updated results, including output data, balloon estimates, updated details, and hold time, to a JSON file.
+Functions:
+- main(exp_path): Main function that orchestrates the loading of data, optimization of the thermal model, and saving of results.
+Parameters:
+- exp_path (str): The path to the experiment directory containing the input configurations and output files.
+Usage:
+Run the script from the command line with the path to the experiment directory as an argument:
+    python TM_adjust.py <experiment_path>
+Dependencies:
+- json: For reading and writing JSON files.
+- os: For file path manipulations.
+- sys: For system-specific parameters and functions.
+- astropy.units: For handling physical quantities with units.
+- pandas: For data manipulation and analysis.
+- configparser: For reading configuration files.
+- argparse: For parsing command-line arguments.
+"""
 # Description:
 # A python script to adjust the thermal model results based on the outputs of
 # the filter transfer model.
@@ -103,3 +128,4 @@ if __name__ == "__main__":
     if not os.path.exists(experiment_path):
         raise FileNotFoundError(f"The specified experiment path does not exist: {experiment_path}")
     main(experiment_path)
+
