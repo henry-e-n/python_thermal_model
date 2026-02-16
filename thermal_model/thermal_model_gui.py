@@ -178,7 +178,7 @@ with tabs[0]:
                 else:
                     component_properties["Fit Choice"] = None
                 component_properties["A/L (m)"] = st.sidebar.number_input("A/L (m)", value=0.0, format="%.3f")
-                component_properties["Length (m)"] = st.sidebar.number_input("Length (m)", value=0.0, format="%.3f")
+                # component_properties["Length (m)"] = st.sidebar.number_input("Length (m)", value=0.0, format="%.3f")
                 component_properties["Number"] = st.sidebar.number_input("Number", value=1, format="%d")
 
             if selected_comp_type == "Coax":
