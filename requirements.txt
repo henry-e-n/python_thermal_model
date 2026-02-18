@@ -1,0 +1,9 @@
+numpy
+matplotlib
+pandas
+astropy
+tqdm
+streamlit
+streamlit-extras
+plotly
+scipy

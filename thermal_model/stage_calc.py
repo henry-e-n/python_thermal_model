@@ -6,7 +6,7 @@ import numpy as np
 import sys, os, csv, json
 import matplotlib.pyplot as plt
 import pickle
-
+from tqdm import tqdm
 from global_var import cmr_path, path_to_mat_lib
 from astropy import units as u
 
@@ -18,8 +18,11 @@ for path in [cmr_path]:
 from thermal_conductivity.tc_utils import *
 from thermal_conductivity.fit_types import *
 
+log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
+
+
 def calculate_power_function(details, stage_temps, A_L = False):
-    print("\nCalculating power function for component...")
+    # print("\nCalculating power function for component...")
     """Calculate the power function for a given component.
 
     Args:
@@ -49,11 +52,12 @@ def calculate_power_function(details, stage_temps, A_L = False):
         A_L_val = details["A/L (m)"]
 
     if "Interpolate" in details and details["Interpolate"]:
-        print("Using interpolation for material...")
+        # print("Using interpolation for material...")
         interp_exists, valid_range, interp_func = find_interpolation(mat) # Check if interpolation file exists
         if interp_exists:
             if lowT < valid_range[0] or highT > valid_range[1]:
-                print(f"ERROR: Interpolation range for {mat} is {valid_range}, but requested range is {lowT} to {highT}. Using default material fit instead.")
+                with open(log_file_path, 'w') as log_file:
+                    log_file.write(f"ERROR: Interpolation range for {mat} is {valid_range}, but requested range is {lowT} to {highT}. Using default material fit instead.")
                 fits_obj = get_material_fits(mat)
                 first_fit = fits_obj[0]
                 ConIntQuad = first_fit.tc_integral(lowT*u.K, highT*u.K)[0].value
@@ -62,7 +66,7 @@ def calculate_power_function(details, stage_temps, A_L = False):
         else:
             st.warning(f"WARNING: No interpolation function found for {mat}.")
     else:
-        print("Using fit for material...", mat, details["Fit Choice"])
+        # print("Using fit for material...", mat, details["Fit Choice"])
         fit_obj = get_fit_by_name(mat, details["Fit Choice"])
         ConIntQuad = fit_obj.tc_integral(lowT*u.K, highT*u.K)[0].value
     
@@ -196,7 +200,7 @@ def get_sum_variance(output_data):
         if "Providing Vapor" in comp_details and comp_details["Providing Vapor"]:
             if comp_details.get("Providing Vapor", False):
                 loadProvidingVapor += comp_details.get("Power Total (W)", 0.0)
-    print(f"Load Providing Vapor: {loadProvidingVapor} W")
+    # print(f"Load Providing Vapor: {loadProvidingVapor} W")
         
     
     LitersPCycle = (total_average_load*He3HoldTime*3.6)/(HeRho*HeLH)
@@ -276,11 +280,11 @@ def optimize_tm(components_input, stage_details_input, num_points=10):
     stage_details = stage_details_input.copy()
     components = components_input.copy()
     i = 0
-    for vcs2temp in VCS2_temps:
+    for vcs2temp in tqdm(VCS2_temps, desc="Optimizing VCS2 Temperatures"):
         j = 0
         stage_details["VCS 2"]["lowT"] = vcs2temp        
         stage_details["VCS 1"]["highT"] = vcs2temp
-        for vcs1temp in VCS1_temps:
+        for vcs1temp in tqdm(VCS1_temps, desc="Optimizing VCS1 Temperatures"):
             stage_details["VCS 1"]["lowT"] = vcs1temp
             stage_details["4K - LHe"]["highT"] = vcs1temp # Update the 4K LHe stage high temp to match VCS2 low temp
             details = get_all_powers(components, stage_details)
