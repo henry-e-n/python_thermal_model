@@ -90,7 +90,7 @@ title_area, logo_area = st.columns(2)
 title_area.title("Interactive Thermal Model GUI")
 logo_area.image(f"{file_path}{os.sep}static{os.sep}blast-logo.png", width=200)  # Display the logo in the main body
 
-tabs = st.tabs(["Component Modeling", "Result Tables", "Plots", "About", "Log"])
+tabs = st.tabs(["Component Modeling", "Result Tables", "Plots", "About", "Library", "Log"])
 
 
 # Main Page Content
@@ -653,7 +653,44 @@ with tabs[3]:
         
         Henry Nachman (henry.nachman@utexas.edu)""")
 
+
 with tabs[4]:
+    st.header("Fit Explorer")
+    st.markdown("""
+        This section allows you to explore the available fits for each material in the library.
+        Select a material from the dropdown to view its available fits and their properties.
+    """)
+    selected_material = st.selectbox("Select Material", mat_list, key="fit_explorer_material")
+    if selected_material:
+        has_interpolation, valid_range, interp_func = find_interpolation(selected_material)
+        if has_interpolation:
+            st.success(f"Interpolation available for {selected_material} in the range {valid_range[0]} K - {valid_range[1]} K.")
+        else:
+            st.warning(f"No interpolation available for {selected_material}.")
+        fit_names = get_material_fit_names(selected_material)
+        material_object = get_material(selected_material)
+        left_col, mid_col, right_col = st.columns([0.2, 0.6, 0.2])
+        allfit_fig, allfit_ax = material_object.plot_all_fits()
+        mid_col.pyplot(allfit_fig, use_container_width=True)
+        if fit_names:
+            st.subheader(f"Available Fits for {selected_material}")
+            for fit_name in fit_names:
+                st.markdown(f"**{fit_name}**")
+                fit_object = get_fit_by_name(selected_material, fit_name)
+                fit_properties = {
+                    "Fit Type": fit_object.fit_type,
+                    "Temperature Range (K)": f"{fit_object.range[0]} K - {fit_object.range[1]} K",
+                    "Reference": "NA"
+                }
+                if getattr(fit_object, "reference", None):
+                    fit_properties["Reference"] = fit_object.reference
+                
+                fit_df = pd.DataFrame.from_dict(fit_properties, orient='index', columns=["Value"])
+                st.dataframe(fit_df, use_container_width=True, hide_index=False)
+                
+        else:
+            st.warning(f"No fits available for {selected_material}.")
+with tabs[5]:
     st.header("Log")
     try:
         with open(log_file_path, 'r') as log_file:
