@@ -55,7 +55,7 @@ def random_color(value = 200):
     return c.to_hex(cmap(370/value))
 
 def get_color():
-    if True: #st.get_config("theme.base") == "light":
+    if st.context.theme.type == "light":
         return "#f7f7ff" #"#fff5f5"
     else:
         return "#271d42" # "#4d3e2b"
@@ -90,7 +90,7 @@ title_area, logo_area = st.columns(2)
 title_area.title("Interactive Thermal Model GUI")
 logo_area.image(f"{file_path}{os.sep}static{os.sep}blast-logo.png", width=200)  # Display the logo in the main body
 
-tabs = st.tabs(["Component Modeling", "Result Tables", "Plots", "About", "Library", "Log"])
+tabs = st.tabs(["Component Modeling", "Result Tables", "Allocation", "Plots", "Library", "Log", "About"])
 
 
 # Main Page Content
@@ -552,6 +552,23 @@ with tabs[1]:
     st.dataframe(temp_data_df, use_container_width=True, hide_index=True)
     st.dataframe(cooling_data_df, use_container_width=True)
 with tabs[2]:
+    st.header("Allocation")
+    st.markdown("Enter the power allocation for each stage or component to determine if the system meets the requirements.")
+    for stage in all_stages:
+        allocation_dictionary = {}
+        st.markdown(f"### {stage.name} - Total Power: {stage.power:.2e} W")
+        stage_allocation_value = st.number_input(f"Power Allocation for {stage.name} (W)", value=0.0, format="%.2e", key=f"allocation_{stage.name}")
+        allocation_dictionary[f"{stage.name}_total"] = [stage.power, stage_allocation_value]
+
+        for component in stage.components:
+            # st.markdown(f"{component.name}")
+            allocation_value = st.number_input(f"Power Allocation for {component.name} (W)", value=0.0, format="%.2e", key=f"allocation_{stage.name}_{component.name}")
+            allocation_dictionary[f"{stage.name}_{component.name}"] = [component.properties["Power Total (W)"], allocation_value]
+        allocation_fig, allocation_ax = allocation_plot(allocation_dictionary)
+        left_col, mid_col, right_col = st.columns([0.2, 0.6, 0.2])
+        mid_col.pyplot(allocation_fig, use_container_width=True)
+    
+with tabs[3]:
     st.header("Plots")
 
     if st.session_state.stages_exist:
@@ -628,7 +645,7 @@ with tabs[2]:
             log_to_file(f"Error {e} : Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
             st.warning(f"Error {e} Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
 
-with tabs[3]:
+with tabs[6]:
     st.header("About")
     st.markdown("""
         This is an interactive thermal model GUI for modeling the thermal properties of cryogenic systems.

@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
 import plotly.express as px
+from matplotlib.patches import Patch
 
 from global_var import cmr_path, path_to_mat_lib
 
@@ -94,3 +95,32 @@ def plot_pie_chart(stage, streamlit=True):
     if streamlit:
         st.plotly_chart(fig)
     return fig
+
+def allocation_plot(allocation_dictionary):
+    diff_array = []
+    for key, value in allocation_dictionary.items():
+        diff = value[1] - value[0]
+        diff_array.append(diff)
+    labels = list(allocation_dictionary.keys())
+    x = np.arange(len(labels))
+    width = 0.5
+    allocation_fig, ax = plt.subplots()
+    # plot the positive and negative values in different colors
+    colors = ['red' if x < 0 else 'green' for x in diff_array]
+    rects1 = ax.bar(x - width/2, diff_array, width, label='Allocation', color=colors)
+    # ax.bar_label(rects1, label_type='center', color='white', fontsize=8)
+    # for i, (name, height) in enumerate(zip(labels, diff_array)):
+    #     print(i, name, height)
+    #     ax.text(i, height, f"{name}", ha='right', va='top', color='black', fontsize=8, rotation=90)
+    ax.set_ylabel('Power (W)')
+    ax.set_title('Allocation vs Predicted Power')
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+    ax.grid(axis='y', linestyle='--', alpha=0.7)
+    # Make a custom legend, 
+    legend_elements = [Patch(facecolor='green', label='Under-budget'),
+                          Patch(facecolor='red', label='Over-budget')]
+    ax.legend(handles=legend_elements)
+    plt.xticks(rotation=75)
+    # plt.tight_layout()
+    return allocation_fig, ax    
