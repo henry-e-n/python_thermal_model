@@ -392,7 +392,7 @@ with tabs[0]:
                                         ["Power", stage.power]], 
                                         columns=["Property", "Value"])
                 # st.markdown(stage_df.to_html(index=False), unsafe_allow_html=True)
-                st.dataframe(stage_df, use_container_width=True, hide_index=True, on_select="rerun")
+                st.dataframe(stage_df, width='stretch', hide_index=True, on_select="rerun")
 
                 rows = max(np.ceil(len(stage.components)/3).astype(int), 1)
                 j = 0
@@ -443,7 +443,7 @@ with tabs[0]:
                                         for key, value in component.properties.items()
                                     ]
                                 )
-                                st.dataframe(df, use_container_width=True, hide_index=True)
+                                st.dataframe(df, width="stretch", hide_index=True)
                             st.markdown("</div>", unsafe_allow_html=True)
 
                         st.markdown("</div>", unsafe_allow_html=True)
@@ -491,12 +491,12 @@ with tabs[0]:
     button_col1, button_col2 = st.columns(2)
     
     
-    button_col1.button("Calculate Power", use_container_width=True, type="primary")
+    button_col1.button("Calculate Power", width="stretch", type="primary")
     if button_col1:
         all_stages, updated_cooling_data = calc_power_button_press(stage_components_dict, stage_details)
 
     optim_clicked = st.session_state.get("optimize_clicked", False)
-    button_clicked = button_col2.button("Optimize", use_container_width=True, type="primary")
+    button_clicked = button_col2.button("Optimize", width="stretch", type="primary")
     optim_number = button_col2.slider("Optimize Points", min_value=5, max_value=100, value=10, step=5, key="optimize_slider")
     if button_clicked:
         st.session_state.optimize_clicked = True
@@ -549,8 +549,8 @@ updated_temperature_data = [
 temp_data_df = pd.DataFrame.from_records(updated_temperature_data) #, columns=["Property", "Value"])
 cooling_data_df = pd.DataFrame.from_dict(updated_cooling_data, orient='index', columns=["Value", "Units"])
 with tabs[1]:
-    st.dataframe(temp_data_df, use_container_width=True, hide_index=True)
-    st.dataframe(cooling_data_df, use_container_width=True)
+    st.dataframe(temp_data_df, width="stretch", hide_index=True)
+    st.dataframe(cooling_data_df, width="stretch")
 with tabs[2]:
     st.header("Allocation")
     st.markdown("Enter the power allocation for each stage or component to determine if the system meets the requirements.")
@@ -605,12 +605,12 @@ with tabs[3]:
                         for key, value in selected_component.properties.items()
                     ]
                 )
-                st.dataframe(component_df, use_container_width=True, hide_index=True)
+                st.dataframe(component_df, width="stretch", hide_index=True)
 
                 try:
                     int_fig, int_ax = plot_integral(selected_component, stage)
                     left_col, mid_col, right_col = st.columns([0.2, 0.6, 0.2])
-                    mid_col.pyplot(int_fig, use_container_width=True)
+                    mid_col.pyplot(int_fig, width="stretch")
                 except:
                     st.warning("Integral plot not available for this component type.")
         # Sum Var plot
@@ -640,7 +640,7 @@ with tabs[3]:
             ax.set_xlabel('VCS1 temperature')
             ax.set_title('2D Heatmap of Stage Temperature Variance')
             plt.savefig(f"{file_path}{os.sep}Screenshots{os.sep}heatmap.png", dpi=600, bbox_inches='tight')
-            mid_col.pyplot(fig, use_container_width=True)
+            mid_col.pyplot(fig, width="stretch")
         except Exception as e:
             log_to_file(f"Error {e} : Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
             st.warning(f"Error {e} Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
@@ -688,7 +688,7 @@ with tabs[4]:
         material_object = get_material(selected_material)
         left_col, mid_col, right_col = st.columns([0.2, 0.6, 0.2])
         allfit_fig, allfit_ax = material_object.plot_all_fits()
-        mid_col.pyplot(allfit_fig, use_container_width=True)
+        mid_col.pyplot(allfit_fig, width="stretch")
         if fit_names:
             st.subheader(f"Available Fits for {selected_material}")
             for fit_name in fit_names:
@@ -703,7 +703,7 @@ with tabs[4]:
                     fit_properties["Reference"] = fit_object.reference
                 
                 fit_df = pd.DataFrame.from_dict(fit_properties, orient='index', columns=["Value"])
-                st.dataframe(fit_df, use_container_width=True, hide_index=False)
+                st.dataframe(fit_df, width="stretch", hide_index=False)
                 
         else:
             st.warning(f"No fits available for {selected_material}.")
