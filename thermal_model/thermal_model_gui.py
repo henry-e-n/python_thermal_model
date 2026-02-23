@@ -292,7 +292,6 @@ with tabs[0]:
                             selected_stage_temps["highT"] = upper_stage.low_temp
                         else:
                             selected_stage_temps["highT"] = selected_stage.high_temp
-                        print(selected_stage_temps)
                         component_properties["Power per Part (W)"] = calculate_power_function(component_properties, selected_stage_temps, A_L = False)
                     new_component = Component(name, properties=component_properties)
                     # list the names of the components currently in the stage
@@ -479,7 +478,7 @@ with tabs[0]:
                                 if component.properties.get("Interpolate", False):
                                     df = df[df["Property"] != "Fit Choice"]
                                 df = df[df["Property"] != "Cold Stage"]
-                                st.dataframe(df, use_container_width=True, hide_index=True)
+                                st.dataframe(df, width='stretch', hide_index=True)
                             st.markdown("</div>", unsafe_allow_html=True)
 
                         st.markdown("</div>", unsafe_allow_html=True)
@@ -601,7 +600,7 @@ with tabs[2]:
             allocation_dictionary[f"{stage.name}_{component.name}"] = [component.properties["Power Total (W)"], allocation_value]
         allocation_fig, allocation_ax = allocation_plot(allocation_dictionary)
         left_col, mid_col, right_col = st.columns([0.2, 0.6, 0.2])
-        mid_col.pyplot(allocation_fig, use_container_width=True)
+        mid_col.pyplot(allocation_fig, width='stretch')
     
 with tabs[3]:
     st.header("Plots")

@@ -103,7 +103,6 @@ def get_all_powers(components, stage_details):
     for stage, comps in components.items(): 
         for comp, details in comps.items():
             num = float(details["Number"])
-            print(details)
             stage_temps = stage_details[stage]
             # if not power per part
             if details.get("Type") not in ["Power per Part", "Other"]:
