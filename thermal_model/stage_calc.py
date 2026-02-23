@@ -110,7 +110,6 @@ def get_all_powers(components, stage_details):
                 if details["Warm Stage"] != details["Cold Stage"]:
                     upper_stage = details["Warm Stage"]
                     stage_temps = {"lowT": stage_details[stage]["lowT"], "highT": stage_details[upper_stage]["lowT"]}
-                
             if details.get("Type") == "Coax":
                 power_per_part = calculate_coax_power(details, stage_temps)
                 details["Power per Part (W)"] = power_per_part

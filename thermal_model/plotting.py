@@ -15,7 +15,7 @@ for path in [cmr_path]:
 # from thermal_conductivity.tc_tools import *
 from thermal_conductivity.tc_utils import *
 from thermal_conductivity.fit_types import *
-from stage_calc import select_stage
+from stage_calc import select_stage, find_interpolation
 
 #%% Plot integral
 def plot_integral(selected_component, stages):
@@ -39,18 +39,15 @@ def plot_integral(selected_component, stages):
     else:
         T_low, T_high = [cold_stage.low_temp, cold_stage.high_temp]
     # Plotting
-    fill_between_range = np.arange(T_low, T_high)
+    fill_between_range = np.logspace(np.log10(T_low), np.log10(T_high), 100)
     
     fig, ax = plt.subplots()
 
     mat = get_material(selected_component.properties["Material"])
-    if not selected_component.properties["Interpolate"]:
-        fit_obj = get_fit_by_name(selected_component.properties["Material"], selected_component.properties["Fit Choice"])
-        fit_obj.plot()
-        ax.fill_between(fill_between_range, np.zeros(len(fill_between_range)), fit_obj.function()(fill_between_range, *fit_obj.parameters),
-                    hatch="////", alpha = 0.5, edgecolor = 'b', facecolor="w",
-                    label="Integration Area")
-    else:
+    
+    interp_exists, valid_range, interp_func = find_interpolation(selected_component.properties["Material"]) # Check if interpolation file exists
+
+    if selected_component.properties["Interpolate"] and interp_exists and T_low > valid_range[0] and T_high < valid_range[1]:
         interp_func = mat.interpolate_function
         T_range = np.linspace(interp_func.x[0], interp_func.x[-1], 1000)
         y_vals = interp_func(T_range)
@@ -60,6 +57,16 @@ def plot_integral(selected_component, stages):
                     label="Integration Area")
 
         ax.plot(T_range, y_vals, color="b")
+    else:
+        if selected_component.properties["Fit Choice"] != None:
+            fit_obj = get_fit_by_name(selected_component.properties["Material"], selected_component.properties["Fit Choice"])
+        else:
+            fit_obj = mat.fits[0]
+        fit_obj.plot()
+        ax.fill_between(fill_between_range, np.zeros(len(fill_between_range)), fit_obj.function()(fill_between_range, *fit_obj.parameters),
+                    hatch="////", alpha = 0.5, edgecolor = 'b', facecolor="w",
+                    label="Integration Area")
+
     
     ax.semilogy()
     ax.semilogx()
