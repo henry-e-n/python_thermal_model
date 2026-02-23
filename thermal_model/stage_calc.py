@@ -20,6 +20,11 @@ from thermal_conductivity.fit_types import *
 
 log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
 
+def log_to_file(message):
+    with open(log_file_path, 'a') as log_file:
+        log_file.write(f"{message}\n")
+    return
+
 def select_stage(name, stages):
     selected_stage = next((stage for stage in [stages[0]] + stages[1] if stage.name == name), None)
     return selected_stage
@@ -62,26 +67,22 @@ def calculate_power_function(details, stage_temps, A_L = False):
         A_L_val = details["A/L (m)"]
 
     if "Interpolate" in details and details["Interpolate"]:
-        # print("Using interpolation for material...")
         interp_exists, valid_range, interp_func = find_interpolation(mat) # Check if interpolation file exists
         if interp_exists:
-            if lowT < valid_range[0] or highT > valid_range[1]:
-                with open(log_file_path, 'w') as log_file:
-                    log_file.write(f"ERROR: Interpolation range for {mat} is {valid_range}, but requested range is {lowT} to {highT}. Using default material fit instead.")
+            if lowT <= valid_range[0] or highT >= valid_range[1]:
+                log_to_file(f"ERROR: Interpolation range for {mat} is {valid_range}, but requested range is {lowT} to {highT}. Using default material fit instead.")
                 fits_obj = get_material_fits(mat)
                 first_fit = fits_obj[0]
                 ConIntQuad = first_fit.tc_integral(lowT*u.K, highT*u.K)[0].value
             else:
                 ConIntQuad = get_interpolation_integral(lowT, highT, mat)
         else:
-            st.warning(f"WARNING: No interpolation function found for {mat}.")
+            log_to_file(f"WARNING: No interpolation function found for {mat}. Using default material fit instead.")
     else:
         # print("Using fit for material...", mat, details["Fit Choice"])
         fit_obj = get_fit_by_name(mat, details["Fit Choice"])
         ConIntQuad = fit_obj.tc_integral(lowT*u.K, highT*u.K)[0].value
-    
     ppu = A_L_val*ConIntQuad
-
     return float(ppu)
 
 def get_all_powers(components, stage_details):
@@ -116,7 +117,7 @@ def get_all_powers(components, stage_details):
             elif details.get("Type") == "A/L":
                 power_per_part = calculate_power_function(details, stage_temps, A_L=True)
                 details["Power per Part (W)"] = power_per_part
-            elif details.get("Type") == "Component":
+            elif details.get("Type") == "Component" or details.get("Type") == "Standard":
                 power_per_part = calculate_power_function(details, stage_temps)
                 details["Power per Part (W)"] = power_per_part
             else:
@@ -370,7 +371,7 @@ def find_interpolation(material):
         if interp_func == None:
             return False, None, None
         # interp_func = get_interpolation(os.path.join(path_to_mat_lib, material))
-        valid_range = [round(float(interp_func.x[0]), 2), round(float(interp_func.x[-1]), 2)]
+        valid_range = [round(float(interp_func.x[0]), 3), round(float(interp_func.x[-1]), 3)]
         return True, valid_range, interp_func
     else:
         return False, None, None

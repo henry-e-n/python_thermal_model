@@ -36,11 +36,6 @@ def default_page_load():
     
 default_page_load()
 
-def log_to_file(message):
-    with open(log_file_path, 'a') as log_file:
-        log_file.write(f"{message}\n")
-    return
-
 if not os.path.exists(cmr_path):
     log_to_file(f"ERROR : path to cryogenics materials properties repository is not found {cmr_path}")
     exit()
@@ -676,7 +671,7 @@ with tabs[3]:
             plt.savefig(f"{file_path}{os.sep}Screenshots{os.sep}heatmap.png", dpi=600, bbox_inches='tight')
             mid_col.pyplot(fig, width="stretch")
         except Exception as e:
-            log_to_file(f"Error {e} : Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
+            # log_to_file(f"Error {e} : Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
             st.warning(f"Error {e} Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
 
 with tabs[6]:
