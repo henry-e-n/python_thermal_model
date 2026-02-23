@@ -149,10 +149,16 @@ with tabs[0]:
             
             # Dictionary to hold component properties
             component_properties = {}
+            component_properties["Cold Stage"] = selected_stage_name
 
             if selected_comp_type == "Standard":
                 # Add input fields for Standard component properties
                 component_properties["Type"] = "Standard"
+                default_upper_stage = st.sidebar.checkbox("Use default upper stage", value=True)
+                if not default_upper_stage:
+                    component_properties["Warm Stage"] = st.sidebar.selectbox("Warm Stage", [st.session_state.main_stage.name] + [stage.name for stage in st.session_state.main_stage.stages])
+                else:
+                    component_properties["Warm Stage"] = selected_stage_name
                 component_properties["Material"] = st.sidebar.selectbox("Material", mat_list)
                 has_interpolation, valid_range, interp_func = find_interpolation(component_properties["Material"]) # Searches for interpolation file, returns True if it exists
                 if has_interpolation: # If interpolation file exists
@@ -169,6 +175,11 @@ with tabs[0]:
             if selected_comp_type == "A/L":
                 # Add input fields for A/L component properties
                 component_properties["Type"] = "A/L"
+                default_upper_stage = st.sidebar.checkbox("Use default upper stage", value=True)
+                if not default_upper_stage:
+                    component_properties["Warm Stage"] = st.sidebar.selectbox("Warm Stage", [st.session_state.main_stage.name] + [stage.name for stage in st.session_state.main_stage.stages])
+                else:
+                    component_properties["Warm Stage"] = selected_stage_name
                 component_properties["Material"] = st.sidebar.selectbox("Material", mat_list)
                 has_interpolation, valid_range , interp_func = find_interpolation(component_properties["Material"]) # Searches for interpolation file, returns True if it exists
                 if has_interpolation: # If interpolation file exists
@@ -184,6 +195,11 @@ with tabs[0]:
             if selected_comp_type == "Coax":
                 # Add input fields for Coax component properties
                 component_properties["Type"] = "Coax"
+                default_upper_stage = st.sidebar.checkbox("Use default upper stage", value=True)
+                if not default_upper_stage:
+                    component_properties["Warm Stage"] = st.sidebar.selectbox("Warm Stage", [st.session_state.main_stage.name] + [stage.name for stage in st.session_state.main_stage.stages])
+                else:
+                    component_properties["Warm Stage"] = selected_stage_name
                 component_properties["Casing Material"] = st.sidebar.selectbox("Casing Material", mat_list)
                 has_interpolation, valid_range , interp_func = find_interpolation(component_properties["Casing Material"]) # Searches for interpolation file, returns True if it exists
                 if has_interpolation: # If interpolation file exists
@@ -227,6 +243,10 @@ with tabs[0]:
             if selected_comp_type == "Power per Part":
                 # Add input fields for Power per Part component properties
                 component_properties["Type"] = "Power per Part"
+                default_upper_stage = st.sidebar.checkbox("Use default upper stage", value=True)
+                # if not default_upper_stage:
+                #     component_properties["Warm Stage"] = st.sidebar.selectbox("Warm Stage", [st.session_state.main_stage.name] + [stage.name for stage in st.session_state.main_stage.stages])
+                
                 component_properties["Power per Part (W)"] = st.sidebar.number_input("Power per Part (W)", value=0.0, format="%.3f")
                 component_properties["Number"] = st.sidebar.number_input("Number", value=1, format="%d")
 
@@ -234,10 +254,11 @@ with tabs[0]:
                 component_properties["Time On (h/d)"] = st.sidebar.number_input("Time On (h/d)", value=0.0, format="%.1f", max_value=24.0, step = 0.5)
                 component_properties["Time Off (h/d)"] = st.sidebar.number_input("Time Off (h/d)", value=0.0, format="%.1f", max_value=24.0, step = 0.5)
 
-            if "4K" in selected_stage_name:
-                component_properties["Providing Vapor"] = st.sidebar.checkbox("Providing Vapor", value=True)
-            else:
-                component_properties["Providing Vapor"] = st.sidebar.checkbox("Providing Vapor", value=False)
+            if selected_comp_type != "Stage":
+                if "4K" in selected_stage_name:
+                    component_properties["Providing Vapor"] = st.sidebar.checkbox("Providing Vapor", value=True)
+                else:
+                    component_properties["Providing Vapor"] = st.sidebar.checkbox("Providing Vapor", value=False)
         ############################################################
         ############################################################
 
@@ -256,12 +277,22 @@ with tabs[0]:
                     st.sidebar.success(f"Stage '{name}' added!")
             else:
                 # Add a new component to the selected stage
-                selected_stage = next((stage for stage in [st.session_state.main_stage] + st.session_state.main_stage.stages if stage.name == selected_stage_name), None)
+                # selected_stage = next((stage for stage in [st.session_state.main_stage] + st.session_state.main_stage.stages if stage.name == selected_stage_name), None)
+                selected_stage = select_stage(selected_stage_name, [st.session_state.main_stage, st.session_state.main_stage.stages])
+                upper_stage_name = component_properties.get("Warm Stage", selected_stage_name)
+                if upper_stage_name is None:
+                    upper_stage_name = selected_stage_name
+                else:
+                    upper_stage = next((stage for stage in [st.session_state.main_stage] + st.session_state.main_stage.stages if stage.name == upper_stage_name), None)
                 if selected_stage:
                     if selected_comp_type == "Standard":
                         selected_stage_temps = {}
                         selected_stage_temps["lowT"] = selected_stage.low_temp
-                        selected_stage_temps["highT"] = selected_stage.high_temp
+                        if upper_stage_name != selected_stage_name:
+                            selected_stage_temps["highT"] = upper_stage.low_temp
+                        else:
+                            selected_stage_temps["highT"] = selected_stage.high_temp
+                        print(selected_stage_temps)
                         component_properties["Power per Part (W)"] = calculate_power_function(component_properties, selected_stage_temps, A_L = False)
                     new_component = Component(name, properties=component_properties)
                     # list the names of the components currently in the stage
@@ -387,9 +418,9 @@ with tabs[0]:
             with st.expander(f"{stage.name}", expanded=False):
                 # Display stage properties as editable fields
                 stage_df = pd.DataFrame([
-                                        ["High Temp", stage.high_temp],
-                                        ["Low Temp", stage.low_temp], 
-                                        ["Power", stage.power]], 
+                                        ["High Temp", f"{stage.high_temp:.2f}"],
+                                        ["Low Temp", f"{stage.low_temp:.2f}"], 
+                                        ["Power", f"{stage.power:.2e}"]], 
                                         columns=["Property", "Value"])
                 # st.markdown(stage_df.to_html(index=False), unsafe_allow_html=True)
                 st.dataframe(stage_df, use_container_width=True, hide_index=True, on_select="rerun")
@@ -435,7 +466,8 @@ with tabs[0]:
                                         {
                                             "Property": key,
                                             "Value": (
-                                                f"{value:.3e}" if isinstance(value, (int, float)) and not isinstance(value, bool)
+                                                f"{value:.3e}" if isinstance(value, (float)) and not isinstance(value, (int, bool))
+                                                else f"{value:d}" if isinstance(value, int) and not isinstance(value, bool)
                                                 else ("True" if value is True else "False") if isinstance(value, bool)
                                                 else value
                                             )
@@ -443,6 +475,11 @@ with tabs[0]:
                                         for key, value in component.properties.items()
                                     ]
                                 )
+                                print(component.properties.items())
+                                # if interpolate is true, then remove Fit choice from dataframe
+                                if component.properties.get("Interpolate", False):
+                                    df = df[df["Property"] != "Fit Choice"]
+                                df = df[df["Property"] != "Cold Stage"]
                                 st.dataframe(df, use_container_width=True, hide_index=True)
                             st.markdown("</div>", unsafe_allow_html=True)
 
@@ -472,7 +509,6 @@ with tabs[0]:
         for stage_name, components in components_dict.items():
             total_power = 0
             for component_name, properties in components.items():
-                # properties["Power per Part (W)"] = float(calculate_power_function(properties, stage_details[stage_name], A_L = False))
                 if "Power per Part (W)" in properties and "Number" in properties:
                     properties["Power Total (W)"] = float(properties["Power per Part (W)"]) * int(properties["Number"])
                     total_power += properties["Power Total (W)"]
@@ -608,7 +644,7 @@ with tabs[3]:
                 st.dataframe(component_df, use_container_width=True, hide_index=True)
 
                 try:
-                    int_fig, int_ax = plot_integral(selected_component, stage)
+                    int_fig, int_ax = plot_integral(selected_component, [st.session_state.main_stage, st.session_state.main_stage.stages])
                     left_col, mid_col, right_col = st.columns([0.2, 0.6, 0.2])
                     mid_col.pyplot(int_fig, use_container_width=True)
                 except:

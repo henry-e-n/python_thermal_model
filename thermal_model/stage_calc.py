@@ -20,6 +20,9 @@ from thermal_conductivity.fit_types import *
 
 log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
 
+def select_stage(name, stages):
+    selected_stage = next((stage for stage in [stages[0]] + stages[1] if stage.name == name), None)
+    return selected_stage
 
 def calculate_power_function(details, stage_temps, A_L = False):
     # print("\nCalculating power function for component...")
@@ -34,14 +37,21 @@ def calculate_power_function(details, stage_temps, A_L = False):
         ppu (float): The calculated power per unit.
     """
 
-    lowT, highT = stage_temps["lowT"], stage_temps["highT"]
-    mat = details["Material"]
-    if not A_L:
-        OD, ID = float(details["OD (m)"]), float(details["ID (m)"])
-        area = np.pi*(0.5*(OD))**2 - np.pi*(0.5*(ID))**2
-        length = details["Length (m)"]
+    # lowT, highT = stage_temps["lowT"], stage_temps["highT"]
+    # mat = details["Material"]
+    # if not A_L:
+    #     OD, ID = float(details["OD (m)"]), float(details["ID (m)"])
+    #     area = np.pi*(0.5*(OD))**2 - np.pi*(0.5*(ID))**2
+    #     length = details["Length (m)"]
 
     lowT, highT = stage_temps["lowT"], stage_temps["highT"]
+    # if "Warm Stage Temp (K)" in details:
+    #     warm_stage_temp = details["Warm Stage Temp (K)"]
+    #     if warm_stage_temp != highT:
+    #         highT = warm_stage_temp
+    #         with open(log_file_path, 'w') as log_file:
+    #             log_file.write(f"WARNING: {details['Name']} warm stage temp {warm_stage_temp} K does not match stage high temp {highT} K. Using component warm stage temp for power calculation.")
+
     mat = details["Material"]
     if not A_L:
         OD, ID = float(details["OD (m)"]), float(details["ID (m)"])
@@ -84,23 +94,31 @@ def get_all_powers(components, stage_details):
     Returns:
         components (dict): The updated component details with power calculations.
     """
+    # for stage, comps in components.items(): 
+    #     for comp, details in comps.items():
+    #         num = float(details["Number"])
+    #         if details.get("Type") == "Coax":
+    #             power_per_part = calculate_coax_power(details, stage_details[stage])
+    #             details["Power per Part (W)"] = power_per_part
     for stage, comps in components.items(): 
         for comp, details in comps.items():
             num = float(details["Number"])
+            print(details)
+            stage_temps = stage_details[stage]
+            # if not power per part
+            if details.get("Type") not in ["Power per Part", "Other"]:
+                if details["Warm Stage"] != details["Cold Stage"]:
+                    upper_stage = details["Warm Stage"]
+                    stage_temps = {"lowT": stage_details[stage]["lowT"], "highT": stage_details[upper_stage]["lowT"]}
+                
             if details.get("Type") == "Coax":
-                power_per_part = calculate_coax_power(details, stage_details[stage])
-                details["Power per Part (W)"] = power_per_part
-    for stage, comps in components.items(): 
-        for comp, details in comps.items():
-            num = float(details["Number"])
-            if details.get("Type") == "Coax":
-                power_per_part = calculate_coax_power(details, stage_details[stage])
+                power_per_part = calculate_coax_power(details, stage_temps)
                 details["Power per Part (W)"] = power_per_part
             elif details.get("Type") == "A/L":
-                power_per_part = calculate_power_function(details, stage_details[stage], A_L=True)
+                power_per_part = calculate_power_function(details, stage_temps, A_L=True)
                 details["Power per Part (W)"] = power_per_part
             elif details.get("Type") == "Component":
-                power_per_part = calculate_power_function(details, stage_details[stage])
+                power_per_part = calculate_power_function(details, stage_temps)
                 details["Power per Part (W)"] = power_per_part
             else:
                 power_per_part = float(details["Power per Part (W)"])

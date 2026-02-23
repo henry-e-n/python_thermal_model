@@ -15,23 +15,29 @@ for path in [cmr_path]:
 # from thermal_conductivity.tc_tools import *
 from thermal_conductivity.tc_utils import *
 from thermal_conductivity.fit_types import *
+from stage_calc import select_stage
 
 #%% Plot integral
-def plot_integral(selected_component, stage):
+def plot_integral(selected_component, stages):
     """
     Description:
         This function plots the thermal conductivity of a selected component over the temperature range defined by the stage.
 
     Args:
         selected_component : The component whose thermal conductivity is to be plotted.
-        stage              : The stage object containing temperature information.
+        stage_details      : The stage details containing temperature information.
 
     Returns:
         fig, ax : The figure and axis objects for the plot.
     """
 
     all_files       = os.listdir(cmr_path)
-    T_low, T_high = [stage.low_temp, stage.high_temp]
+    cold_stage = select_stage(selected_component.properties["Cold Stage"], stages)
+    warm_stage = select_stage(selected_component.properties["Warm Stage"], stages)
+    if warm_stage.name != cold_stage.name:
+        T_low, T_high = [cold_stage.low_temp, warm_stage.low_temp]
+    else:
+        T_low, T_high = [cold_stage.low_temp, cold_stage.high_temp]
     # Plotting
     fill_between_range = np.arange(T_low, T_high)
     
