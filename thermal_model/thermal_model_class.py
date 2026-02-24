@@ -38,7 +38,7 @@ class ThermalModel:
         Returns:
             Component_Inspect: An object containing the component's properties and methods.
         """
-        if stage is not None: # Indentifies the specified stage
+        if stage is not None: # Identifies the specified stage
             for component in self.components[stage]: # Searches for the component with specified name
                 if component == name:
                     selected_comp = Component_Inspect(self, component, stage)
