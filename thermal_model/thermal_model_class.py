@@ -133,7 +133,7 @@ class Component_Inspect:
 
         self.number = self.properties.get("Number", 1)
         self.stage = stage
-        self.total_power = self.calculate_power()
+        # self.total_power = self.calculate_power()
 
     def calculate_power(self):
         """Calculate the power function for the given component.
@@ -143,7 +143,12 @@ class Component_Inspect:
         Returns:
             float: The calculated power per unit.
         """
+        print(self, self.name, self.stage)
         stage_temps = self.model.stage_temps[self.stage]
+        if self.model.properties["Warm Stage"] != self.model.properties["Cold Stage"]:
+            upper_stage = self.model.properties["Warm Stage"]
+            stage_temps = {"lowT": self.model.stage_details[self.stage]["lowT"], "highT": self.model.stage_details[upper_stage]["lowT"]}
+
         if self.type == "Power per Part":
             return self.power_per_part * self.number
         elif self.type in ["Component", "Standard", "A/L", "Coax"]:
