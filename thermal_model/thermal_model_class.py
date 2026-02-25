@@ -55,7 +55,10 @@ class ThermalModel:
         This method iterates through all components in each stage and calculates their power based on the current stage temperatures.
         """
         self.components = get_all_powers(self.components, self.stage_temps)
-        self.total_power = sum(comp.calculate_power() for stage in self.components.values() for comp in stage)
+        
+        for stages in self.stages:
+            sum_power = sum([comp["Power Total (W)"] for comp in self.get_stage(stages).components.values()])
+            self.total_power[stages] = sum_power
 
     def optimize(self, optimization_points: int = 10):
         """
