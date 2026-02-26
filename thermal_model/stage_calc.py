@@ -172,14 +172,6 @@ def get_sum_variance(output_data):
     """
     HeCap = 300 # L
     FridgeCap = 6 #J
-    MaxFlightTime = 35*24*3600
-    HeRho = 0.125 #kg/L
-    HeLH = 21 #kJ/kg
-    Cpgas = 5.5 # kJ/(kg*K)
-    HeBP = 4.2 # K
-    HeCap = 300 # L
-    FridgeCap = 6 #J
-    MaxFlightTime = 35*24*3600
     HeRho = 0.125 #kg/L
     HeLH = 21 #kJ/kg
     Cpgas = 5.5 # kJ/(kg*K)
