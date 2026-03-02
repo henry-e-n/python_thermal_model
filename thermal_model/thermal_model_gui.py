@@ -24,7 +24,6 @@ abspath = os.path.abspath(__file__)
 file_path = os.path.dirname(abspath)
 
 # log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
-print("CHECKPOINT 1")
 # if not os.path.exists(log_file_path):
 #     with open(log_file_path, 'w') as log_file:
 #         log_file.write("Thermal Model Log File\n")
@@ -42,8 +41,7 @@ default_page_load()
 #     log_to_file(f"ERROR : path to cryogenics materials properties repository is not found {cmr_path}")
 #     exit()
 
-print(tc.tc_utils.get_materials_list())
-mat_list = [folder for folder in os.listdir(path_to_mat_lib) if os.path.isdir(os.path.join(path_to_mat_lib, folder))]
+mat_list = tc.tc_utils.get_materials_list() # [folder for folder in os.listdir(path_to_mat_lib) if os.path.isdir(os.path.join(path_to_mat_lib, folder))]
 mat_list.sort()
 
 # # Function to generate a random color
@@ -87,7 +85,7 @@ title_area, logo_area = st.columns(2)
 title_area.title("Interactive Thermal Model GUI")
 logo_area.image(f"{file_path}{os.sep}static{os.sep}blast-logo.png", width=200)  # Display the logo in the main body
 
-tabs = st.tabs(["Component Modeling", "Result Tables", "Allocation", "Plots", "Library", "Log", "About"])
+tabs = st.tabs(["Component Modeling", "Result Tables", "Allocation", "Plots", "Library", "About"])
 
 
 # Main Page Content
@@ -103,6 +101,7 @@ with tabs[0]:
     
     def get_material_fit_names(mat_name):
         # Load the material class from the material pkl file
+        print(path_to_mat_lib)
         with open(os.path.join(path_to_mat_lib, mat_name, f"material.pkl"), 'rb') as f:
             material_obj = pickle.load(f)
         fits_list = [fit.name for fit in material_obj.fits]
@@ -676,7 +675,7 @@ with tabs[3]:
             log_to_file(f"Error {e} : Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
             st.warning(f"Error {e} Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
 
-with tabs[6]:
+with tabs[5]:
     st.header("About")
     st.markdown("""
         This is an interactive thermal model GUI for modeling the thermal properties of cryogenic systems.
@@ -738,11 +737,3 @@ with tabs[4]:
                 
         else:
             st.warning(f"No fits available for {selected_material}.")
-with tabs[5]:
-    st.header("Log")
-#     try:
-#         with open(log_file_path, 'r') as log_file:
-#             log_contents = log_file.read()
-#             st.text_area("Log Contents", log_contents, height=400)
-#     except FileNotFoundError:
-#         st.warning("Log file not found.")
