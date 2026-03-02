@@ -42,8 +42,7 @@ default_page_load()
 #     log_to_file(f"ERROR : path to cryogenics materials properties repository is not found {cmr_path}")
 #     exit()
 
-print(tc.lib)
-print([file for file in os.listdir(tc.lib)])
+print(tc.tc_utils.get_materials_list())
 mat_list = [folder for folder in os.listdir(path_to_mat_lib) if os.path.isdir(os.path.join(path_to_mat_lib, folder))]
 mat_list.sort()
 
