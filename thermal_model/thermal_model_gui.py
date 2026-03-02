@@ -688,7 +688,7 @@ with tabs[3]:
             st.warning(f"Error {e} Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
 
 with tabs[5]:
-    tab1_content = read_markdown_file("about.md")
+    tab1_content = read_markdown_file(os.path.join(file_path, "about.md"))
     st.markdown(tab1_content, unsafe_allow_html=True)
 
 
