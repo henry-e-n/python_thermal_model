@@ -3,7 +3,7 @@ matplotlib
 pandas
 astropy
 tqdm
-streamlit=1.54.0
+streamlit==1.54.0
 streamlit-extras
 plotly
 scipy
