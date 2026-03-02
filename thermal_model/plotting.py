@@ -31,7 +31,7 @@ def plot_integral(selected_component, stages):
         fig, ax : The figure and axis objects for the plot.
     """
 
-    all_files       = os.listdir(cmr_path)
+    # all_files       = os.listdir(cmr_path)
     cold_stage = select_stage(selected_component.properties["Cold Stage"], stages)
     warm_stage = select_stage(selected_component.properties["Warm Stage"], stages)
     if warm_stage.name != cold_stage.name:
