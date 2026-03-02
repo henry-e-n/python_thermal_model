@@ -2,12 +2,15 @@ import streamlit as st
 from components.component import Component
 from stages.stage import Stage
 import random, os, sys
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.colors as c
 import json, pickle
 import numpy as np
 from stage_calc import *
+
+
 import plotly.express as px
 import logging
 import matplotlib as mpl
@@ -87,7 +90,6 @@ logo_area.image(f"{file_path}{os.sep}static{os.sep}blast-logo.png", width=200)  
 
 tabs = st.tabs(["Component Modeling", "Result Tables", "Allocation", "Plots", "Library", "About"])
 
-
 # Main Page Content
 with tabs[0]:
     
@@ -100,8 +102,18 @@ with tabs[0]:
     # Select the type of component you want to add
     
     def get_material_fit_names(mat_name):
+        """Gets the names of fits available for a given material.
+
+        If you are wondering why this is working despite path_to_mat_lib not being defined anywhere in this package, the answer is that 
+        path_to_mat_lib is also defined in the thermal-model package, thus all relative paths still work.
+
+        Args:
+            mat_name (str): The name of the material.
+
+        Returns:
+            list: A list of fit names available for the given material.
+        """
         # Load the material class from the material pkl file
-        print(path_to_mat_lib)
         with open(os.path.join(path_to_mat_lib, mat_name, f"material.pkl"), 'rb') as f:
             material_obj = pickle.load(f)
         fits_list = [fit.name for fit in material_obj.fits]
