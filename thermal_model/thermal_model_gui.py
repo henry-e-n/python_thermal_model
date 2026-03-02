@@ -16,6 +16,7 @@ from streamlit_extras.stylable_container import stylable_container
 
 # from global_var import cmr_path, path_to_mat_lib
 from plotting import *
+import thermal_conductivity as tc
 
 # Define Paths
 
@@ -41,7 +42,8 @@ default_page_load()
 #     log_to_file(f"ERROR : path to cryogenics materials properties repository is not found {cmr_path}")
 #     exit()
 
-
+print(tc.lib)
+print([file for file in os.listdir(tc.lib)])
 mat_list = [folder for folder in os.listdir(path_to_mat_lib) if os.path.isdir(os.path.join(path_to_mat_lib, folder))]
 mat_list.sort()
 
@@ -672,7 +674,7 @@ with tabs[3]:
             plt.savefig(f"{file_path}{os.sep}Screenshots{os.sep}heatmap.png", dpi=600, bbox_inches='tight')
             mid_col.pyplot(fig, width="stretch")
         except Exception as e:
-            # log_to_file(f"Error {e} : Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
+            log_to_file(f"Error {e} : Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
             st.warning(f"Error {e} Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
 
 with tabs[6]:

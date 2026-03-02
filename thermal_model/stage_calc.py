@@ -21,8 +21,8 @@ from thermal_conductivity.fit_types import *
 # log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
 
 def log_to_file(message):
-    with open(log_file_path, 'a') as log_file:
-        log_file.write(f"{message}\n")
+    # with open(log_file_path, 'a') as log_file:
+    #     log_file.write(f"{message}\n")
     return
 
 def select_stage(name, stages):
