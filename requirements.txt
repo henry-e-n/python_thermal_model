@@ -7,3 +7,4 @@ streamlit
 streamlit-extras
 plotly
 scipy
+altair<5
