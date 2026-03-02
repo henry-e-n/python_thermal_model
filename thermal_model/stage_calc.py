@@ -7,12 +7,12 @@ import sys, os, csv, json
 import matplotlib.pyplot as plt
 import pickle
 from tqdm import tqdm
-from global_var import cmr_path, path_to_mat_lib
+# from global_var import cmr_path, path_to_mat_lib
 from astropy import units as u
 
-for path in [cmr_path]:
-    if path not in sys.path:
-        sys.path.append(path)
+# for path in [cmr_path]:
+#     if path not in sys.path:
+#         sys.path.append(path)
 
 # from thermal_conductivity.tc_tools import *
 from thermal_conductivity.tc_utils import *

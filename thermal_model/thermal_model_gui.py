@@ -14,7 +14,7 @@ import matplotlib as mpl
 
 from streamlit_extras.stylable_container import stylable_container
 
-from global_var import cmr_path, path_to_mat_lib
+# from global_var import cmr_path, path_to_mat_lib
 from plotting import *
 
 # Define Paths
@@ -36,9 +36,9 @@ def default_page_load():
     
 default_page_load()
 
-if not os.path.exists(cmr_path):
-    log_to_file(f"ERROR : path to cryogenics materials properties repository is not found {cmr_path}")
-    exit()
+# if not os.path.exists(cmr_path):
+#     log_to_file(f"ERROR : path to cryogenics materials properties repository is not found {cmr_path}")
+#     exit()
 
 
 mat_list = [folder for folder in os.listdir(path_to_mat_lib) if os.path.isdir(os.path.join(path_to_mat_lib, folder))]
