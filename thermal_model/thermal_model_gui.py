@@ -688,29 +688,8 @@ with tabs[3]:
             st.warning(f"Error {e} Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
 
 with tabs[5]:
-    st.header("About")
-    st.markdown("""
-        This is an interactive thermal model GUI for modeling the thermal properties of cryogenic systems.
-        It allows users to add components, stages, and visualize the thermal properties of the system.
-        The development of this tool was done in support of the Balloon-borne Large Aperture Sub-millimeter Telescopes (BLAST) collaboration.
-        ### Features:
-        - Add and edit components and stages.
-        - Calculate total thermal power requirements.
-        - Optimize liquid helium cryogenic stage temperatures.
-        - Calculate liquid helium and balloon specific parameters.
-        - Visualize power distribution and temperature variance.
-        parametersparameters
-        
-        ### Help
-        For more guidance, please refer to the [documentation](https://github.com/henry-e-n/python_thermal_model/wiki/0.-Thermal-Model-Wiki).
-        
-        ### Creators:
-        This tool is a culmination of decades of various similar efforts by researchers across experimental cosmology, and other cryogenic experimental fields. 
-                The development of this Python-based tool, package, and GUI was led by Henry Nachman at the University of Texas at Austin.
-
-        If you have any questions, suggestions, or issues, please feel free to reach out:
-        
-        Henry Nachman (henry.nachman@utexas.edu)""")
+    tab1_content = read_markdown_file("about.md")
+    st.markdown(tab1_content, unsafe_allow_html=True)
 
 
 with tabs[4]:

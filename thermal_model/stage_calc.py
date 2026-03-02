@@ -20,6 +20,10 @@ from thermal_conductivity.fit_types import *
 
 # log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
 
+def read_markdown_file(file_path):
+    with open(file_path, "r") as file:
+        return file.read()
+
 def log_to_file(message):
     # with open(log_file_path, 'a') as log_file:
     #     log_file.write(f"{message}\n")
