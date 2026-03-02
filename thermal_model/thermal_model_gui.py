@@ -22,11 +22,12 @@ from plotting import *
 abspath = os.path.abspath(__file__)
 file_path = os.path.dirname(abspath)
 
-log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
-if not os.path.exists(log_file_path):
-    with open(log_file_path, 'w') as log_file:
-        log_file.write("Thermal Model Log File\n")
-        log_file.write("======================\n\n")
+# log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
+print("CHECKPOINT 1")
+# if not os.path.exists(log_file_path):
+#     with open(log_file_path, 'w') as log_file:
+#         log_file.write("Thermal Model Log File\n")
+#         log_file.write("======================\n\n")
 
 def default_page_load():
     st.set_page_config("Interactive Thermal Model GUI", page_icon=":thermometer:", layout="wide")
@@ -738,9 +739,9 @@ with tabs[4]:
             st.warning(f"No fits available for {selected_material}.")
 with tabs[5]:
     st.header("Log")
-    try:
-        with open(log_file_path, 'r') as log_file:
-            log_contents = log_file.read()
-            st.text_area("Log Contents", log_contents, height=400)
-    except FileNotFoundError:
-        st.warning("Log file not found.")
+#     try:
+#         with open(log_file_path, 'r') as log_file:
+#             log_contents = log_file.read()
+#             st.text_area("Log Contents", log_contents, height=400)
+#     except FileNotFoundError:
+#         st.warning("Log file not found.")

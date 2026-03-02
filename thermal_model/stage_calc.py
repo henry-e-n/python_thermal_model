@@ -18,7 +18,7 @@ from astropy import units as u
 from thermal_conductivity.tc_utils import *
 from thermal_conductivity.fit_types import *
 
-log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
+# log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
 
 def log_to_file(message):
     with open(log_file_path, 'a') as log_file:
@@ -70,14 +70,15 @@ def calculate_power_function(details, stage_temps, A_L = False):
         interp_exists, valid_range, interp_func = find_interpolation(mat) # Check if interpolation file exists
         if interp_exists:
             if lowT <= valid_range[0] or highT >= valid_range[1]:
-                log_to_file(f"ERROR: Interpolation range for {mat} is {valid_range}, but requested range is {lowT} to {highT}. Using default material fit instead.")
+                print(f"ERROR: Interpolation range for {mat} is {valid_range}, but requested range is {lowT} to {highT}. Using default material fit instead.")
                 fits_obj = get_material_fits(mat)
                 first_fit = fits_obj[0]
                 ConIntQuad = first_fit.tc_integral(lowT*u.K, highT*u.K)[0].value
             else:
                 ConIntQuad = get_interpolation_integral(lowT, highT, mat)
         else:
-            log_to_file(f"WARNING: No interpolation function found for {mat}. Using default material fit instead.")
+            print(f"WARNING: No interpolation function found for {mat}. Using default material fit instead.")
+            # log_to_file(f"WARNING: No interpolation function found for {mat}. Using default material fit instead.")
     else:
         # print("Using fit for material...", mat, details["Fit Choice"])
         fit_obj = get_fit_by_name(mat, details["Fit Choice"])
