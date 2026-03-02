@@ -6,11 +6,11 @@ import streamlit as st
 import plotly.express as px
 from matplotlib.patches import Patch
 
-from global_var import cmr_path, path_to_mat_lib
+# from global_var import cmr_path, path_to_mat_lib
 
-for path in [cmr_path]:
-    if path not in sys.path:
-        sys.path.append(path)
+# for path in [cmr_path]:
+#     if path not in sys.path:
+#         sys.path.append(path)
 
 # from thermal_conductivity.tc_tools import *
 from thermal_conductivity.tc_utils import *
