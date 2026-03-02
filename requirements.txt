@@ -8,3 +8,4 @@ streamlit-extras
 plotly
 scipy
 altair<5
+git+https://github.com/CMB-S4/Cryogenic_Material_Properties.git

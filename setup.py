@@ -27,7 +27,8 @@ INSTALL_REQUIRES =['numpy',
                     'plotly',
 					'tqdm',
 					'scipy',
-					'h5py'
+					'h5py',
+					'git+https://github.com/CMB-S4/Cryogenic_Material_Properties.git'
 					]
 
 
