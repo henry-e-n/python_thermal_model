@@ -7,7 +7,7 @@ from subprocess import check_call
 
 HERE         = pathlib.Path(__file__).parent
 PACKAGE_NAME = 'thermal_model'
-VERSION      = '0.0.8.4'
+VERSION      = '0.0.8.5'
 AUTHOR       = 'Henry Nachman'
 AUTHOR_EMAIL = 'hen367@my.utexas.edu'
 URL          = 'https://github.com/henry-e-n/python_thermal_model'
@@ -28,7 +28,7 @@ INSTALL_REQUIRES =['numpy',
 					'tqdm',
 					'scipy',
 					'h5py',
-					'git+https://github.com/CMB-S4/Cryogenic_Material_Properties.git'
+					# 'git+https://github.com/CMB-S4/Cryogenic_Material_Properties.git'
 					]
 
 
