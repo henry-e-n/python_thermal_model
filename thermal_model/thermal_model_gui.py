@@ -715,12 +715,14 @@ with tabs[4]:
             for fit_name in fit_names:
                 st.markdown(f"**{fit_name}**")
                 fit_object = get_fit_by_name(selected_material, fit_name)
+                print(f"Fit object for {fit_name}: {fit_object}")
                 fit_properties = {
                     "Fit Type": fit_object.fit_type,
                     "Temperature Range (K)": f"{fit_object.range[0]} K - {fit_object.range[1]} K",
                     "Reference": "NA"
                 }
-                if getattr(fit_object, "reference", None):
+                has_reference = getattr(fit_object, "reference", None)
+                if has_reference is not None:
                     fit_properties["Reference"] = fit_object.reference
                 
                 fit_df = pd.DataFrame.from_dict(fit_properties, orient='index', columns=["Value"])
