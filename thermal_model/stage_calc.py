@@ -73,7 +73,7 @@ def calculate_power_function(details, stage_temps, A_L = False):
     if "Interpolate" in details and details["Interpolate"]:
         interp_exists, valid_range, interp_func = find_interpolation(mat) # Check if interpolation file exists
         if interp_exists:
-            if lowT <= valid_range[0] or highT >= valid_range[1]:
+            if lowT < valid_range[0] or highT > valid_range[1]:
                 print(f"ERROR: Interpolation range for {mat} is {valid_range}, but requested range is {lowT} to {highT}. Using default material fit instead.")
                 fits_obj = get_material_fits(mat)
                 first_fit = fits_obj[0]
