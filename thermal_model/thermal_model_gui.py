@@ -21,6 +21,7 @@ from streamlit_extras.stylable_container import stylable_container
 from plotting import *
 import thermal_conductivity as tc
 
+# mpl.style.use("")
 # Define Paths
 
 abspath = os.path.abspath(__file__)
