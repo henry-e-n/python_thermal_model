@@ -1,0 +1,141 @@
+# custom_style.mplstyle
+
+################################################################################
+################################################################################
+
+# ticks
+xtick.direction   : in
+ytick.direction   : in
+xtick.top         : True
+ytick.right       : True
+xtick.minor.visible : True
+ytick.minor.visible : True
+xtick.major.size  : 7
+ytick.major.size  : 7
+xtick.minor.size  : 3
+ytick.minor.size  : 3
+xtick.major.width : 1.0
+ytick.major.width : 1.0
+xtick.minor.width : 0.5
+ytick.minor.width : 0.5
+xtick.major.pad : 6
+ytick.major.pad : 6
+xtick.labelsize   : 14
+ytick.labelsize   : 14
+
+################################################################################
+################################################################################
+
+# Grid
+axes.grid         : True
+grid.linestyle    : --
+grid.color        : "#b0b0b0"
+grid.linewidth    : 1        # in points
+grid.alpha        : 0.3
+
+################################################################################
+################################################################################
+
+# Axes
+axes.linewidth    : 1.5
+lines.linewidth   : 2.0
+axes.prop_cycle   : cycler(color=['k', 'm', 'c', "#F08700", "#003F91", "#FF6663", "#5E0B15", "#048A81", "#6D326D"])
+axes.labelweight  : normal # bold
+
+################################################################################
+################################################################################
+
+# Text
+font.size         : 14
+axes.labelsize    : 14
+
+################################################################################
+################################################################################
+
+# Title
+axes.titlesize     : 14
+axes.titlelocation : center  # alignment of the title: {left, right, center}
+axes.titleweight   :   normal  # font weight of title
+axes.titlepad      : 12
+################################################################################
+################################################################################
+
+# Figure
+figure.figsize:     7, 5  # figure size in inches
+figure.dpi:         100 # increase to 300 for quality images      # figure dots per inch
+
+# Legend
+legend.frameon    : False
+lines.solid_capstyle : round # butt
+legend.fontsize : 14
+legend.framealpha : 1
+legend.facecolor : "#FFFFFF"
+legend.edgecolor : "#d6d5d5"
+legend.fancybox : True
+legend.shadow  : False
+
+# Legend spacing
+#legend.borderpad
+#legend.labelspacing
+#legend.handlelength
+#legend.handleheight
+#legend.columnspacing
+################################################################################
+################################################################################
+
+# font
+font.family  :  monospace
+
+##     - 'serif' (e.g., Times),
+##     - 'sans-serif' (e.g., Helvetica),
+##     - 'cursive' (e.g., Zapf-Chancery),
+##     - 'fantasy' (e.g., Western), and
+##     - 'monospace' (e.g., Courier).
+
+#font.style   :   normal
+#font.variant : normal
+font.weight  :  normal # bold
+#font.stretch : normal
+#font.size    :    10.0
+
+#font.serif       : Times New Roman
+#font.serif      : DejaVu Serif, Bitstream Vera Serif, Computer Modern Roman, New Century Schoolbook, Century Schoolbook L, Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif
+#font.sans-serif : Helvetica, DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif
+#font.cursive    : Textile, Zapf Chancery, Sand,  Apple Chancery, Script MT, Felipa, Comic Neue, Comic Sans MS, cursive
+#font.fantasy    : Chicago, Charcoal, Impact, Western, xkcd script, fantasy
+font.monospace  : Computer Modern Typewriter, Bitstream Vera Sans Mono, DejaVu Sans Mono,  Andale Mono, Nimbus Mono L, Courier New, Courier, Fixed, Terminal, monospace
+
+################################################################################
+################################################################################
+
+# LaTeX
+mathtext.fontset: cm # Should be 'dejavusans' (default),
+                               # 'dejavuserif', 'cm' (Computer Modern), 'stix',
+                               # 'stixsans' or 'custom'
+mathtext.bf:  cm:bold #sans:bold
+#mathtext.bfit: sans:italic:bold
+#mathtext.cal: cursive
+#mathtext.it:  sans:italic
+#mathtext.rm:  sans
+#mathtext.sf:  sans
+#mathtext.tt:  monospace
+
+################################################################################
+################################################################################
+
+# SAVING FIGURES
+
+savefig.dpi        : 300 # figure      # figure dots per inch or 'figure'
+savefig.facecolor  : auto        # figure face color when saving
+#savefig.edgecolor  : auto        # figure edge color when saving
+savefig.format     :  pdf         # {png, ps, pdf, svg}
+savefig.bbox       :  tight    # {tight, standard}
+                                # 'tight' is incompatible with generating frames
+                                # for animation
+savefig.pad_inches:  0.1       # padding to be used, when bbox is set to 'tight'
+#savefig.directory:   ~         # default directory in savefig dialog, gets updated after
+                                # interactive saves, unless set to the empty string (i.e.
+                                # the current directory); use '.' to start at the current
+                                # directory but update after interactive saves
+savefig.transparent : False     # whether figures are saved with a transparent
+                                # background by default

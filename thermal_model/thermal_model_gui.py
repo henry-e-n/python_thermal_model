@@ -21,12 +21,12 @@ from streamlit_extras.stylable_container import stylable_container
 from plotting import *
 import thermal_conductivity as tc
 
-# mpl.style.use("")
 # Define Paths
 
 abspath = os.path.abspath(__file__)
 file_path = os.path.dirname(abspath)
 
+mpl.style.use(f"{file_path}{os.sep}static{os.sep}CustomMono.mplstyle")
 # log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
 # if not os.path.exists(log_file_path):
 #     with open(log_file_path, 'w') as log_file:
@@ -711,14 +711,14 @@ with tabs[4]:
             st.warning(f"No interpolation available for {selected_material}.")
         fit_names = get_material_fit_names(selected_material)
         material_object = get_material(selected_material)
-        left_col, mid_col, right_col = st.columns([0.2, 0.6, 0.2])
+        left_col, mid_col, right_col = st.columns([0.1, 0.8, 0.1])
         allfit_fig, allfit_ax = material_object.plot_all_fits()
+        allfit_ax.legend(bbox_to_anchor=(1.05, 0.5), loc='center left') # Place the legend outside the plot on the right, and left justified
         mid_col.pyplot(allfit_fig, width="stretch")
         if fit_names:
             st.subheader(f"Available Fits for {selected_material}")
             for fit_name in fit_names:
                 include_fit = st.checkbox(f"**{fit_name}**", key=f"checkbox_{fit_name}")
-                # st.markdown(f"**{fit_name}**")
                 fit_object = get_fit_by_name(selected_material, fit_name)
                 if include_fit:
                     st.session_state.fits_to_show.append(fit_object)
@@ -745,17 +745,22 @@ with tabs[4]:
     plotting_fits = []
 
     # Generate a list of colors the length of the number of fits to show, using the matplotlib set 1 colormap
-    cmap = plt.cm.get_cmap('Set1', len(st.session_state.fits_to_show))
 
+    num_unique_fits = 0
+    color_dict = {}
     for i, fit in enumerate(st.session_state.fits_to_show): 
         if fit.name not in plotting_fits:
             plotting_fits.append(fit.name)
-            palette = plt.cm.get_cmap("Dark2", 9)
-            color_idx = sum(ord(ch) for ch in fit.name) % palette.N
-            fit.plot(color=palette(color_idx), label=fit.name)
+            palette = mpl.colormaps["Dark2"]
+            color_dict[fit.name] = palette(num_unique_fits)
+            fit.plot(color=color_dict[fit.name], label=fit.name)
+            num_unique_fits += 1
+            if num_unique_fits >= 4:  # if too many lines and labels, place legend outside of plot
+                axs.legend(bbox_to_anchor=(1.05, 0.5), loc='center left') # Place the legend outside the plot on the right, and left justified
+            else:
+                axs.legend(loc='best')
     axs.set_title("Selected Fits")
-    axs.legend()
-    left_col, mid_col, right_col = st.columns([0.2, 0.6, 0.2])
+    left_col, mid_col, right_col = st.columns([0.1, 0.8, 0.1])
     mid_col.pyplot(fig, width="stretch")
 
     clear_button_state = st.button("Clear Selected Fits", key="clear_fits_button")
