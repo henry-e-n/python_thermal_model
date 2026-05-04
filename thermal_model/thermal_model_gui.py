@@ -739,23 +739,25 @@ with tabs[4]:
     st.header("Compare Fits")
     st.markdown("Use this tool to compare fits across different materials. After selecting a material from the dropdown above, use the checkboxes to the left of each fit name to add it to the following plot. The selected fits will be plotted together for easy comparison.")
     fig, axs = plt.subplots()
-    print([fit.name for fit in st.session_state.fits_to_show])
     st.session_state.fits_to_show = list(set(st.session_state.fits_to_show)) # Remove duplicates
-    print([fit.name for fit in st.session_state.fits_to_show])
 
     plotting_fits = []
-    for fit in st.session_state.fits_to_show:
-        # print(fit)
+
+    # Generate a list of colors the length of the number of fits to show, using the matplotlib set 1 colormap
+    cmap = plt.cm.get_cmap('Set1', len(st.session_state.fits_to_show))
+
+    for i, fit in enumerate(st.session_state.fits_to_show): 
         if fit.name not in plotting_fits:
             plotting_fits.append(fit.name)
-            fit.plot()
+            palette = plt.cm.get_cmap("Dark2", 9)
+            color_idx = sum(ord(ch) for ch in fit.name) % palette.N
+            fit.plot(color=palette(color_idx), label=fit.name)
     axs.set_title("Selected Fits")
     axs.legend()
     left_col, mid_col, right_col = st.columns([0.2, 0.6, 0.2])
     mid_col.pyplot(fig, width="stretch")
 
     clear_button_state = st.button("Clear Selected Fits", key="clear_fits_button")
-    print(clear_button_state)
     if clear_button_state:
         st.session_state.fits_to_show = []
         clear_button_state = False
