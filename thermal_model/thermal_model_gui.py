@@ -89,7 +89,7 @@ with open(f"{file_path}{os.sep}static{os.sep}styles.css") as f:
 # Streamlit app
 title_area, logo_area = st.columns(2)
 title_area.title("Interactive Thermal Model GUI")
-logo_area.image(f"{file_path}{os.sep}static{os.sep}blast-logo.png", width=200)  # Display the logo in the main body
+logo_area.image(f"{file_path}{os.sep}static{os.sep}blast-logo.jpg", width=200)  # Display the logo in the main body
 
 tabs = st.tabs(["Component Modeling", "Result Tables", "Allocation", "Plots", "Library", "About"])
 
