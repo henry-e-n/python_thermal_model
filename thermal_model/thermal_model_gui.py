@@ -75,6 +75,9 @@ if 'optimize_clicked' not in st.session_state:
 if 'optimized' not in st.session_state:
     st.session_state.optimized = False
 
+if 'fits_to_show' not in st.session_state:
+    st.session_state.fits_to_show = []
+
 if st.session_state.main_stage == []:
     st.session_state.stages_exist = False
 else:
@@ -713,9 +716,11 @@ with tabs[4]:
         if fit_names:
             st.subheader(f"Available Fits for {selected_material}")
             for fit_name in fit_names:
-                st.markdown(f"**{fit_name}**")
+                include_fit = st.checkbox(f"**{fit_name}**", key=f"checkbox_{fit_name}")
+                # st.markdown(f"**{fit_name}**")
                 fit_object = get_fit_by_name(selected_material, fit_name)
-                print(f"Fit object for {fit_name}: {fit_object}")
+                if include_fit:
+                    st.session_state.fits_to_show.append(fit_object)
                 fit_properties = {
                     "Fit Type": fit_object.fit_type,
                     "Temperature Range (K)": f"{fit_object.range[0]} K - {fit_object.range[1]} K",
@@ -727,6 +732,31 @@ with tabs[4]:
                 
                 fit_df = pd.DataFrame.from_dict(fit_properties, orient='index', columns=["Value"])
                 st.dataframe(fit_df, width="stretch", hide_index=False)
-                
+
         else:
             st.warning(f"No fits available for {selected_material}.")
+
+    st.header("Compare Fits")
+    st.markdown("Use this tool to compare fits across different materials. After selecting a material from the dropdown above, use the checkboxes to the left of each fit name to add it to the following plot. The selected fits will be plotted together for easy comparison.")
+    fig, axs = plt.subplots()
+    print([fit.name for fit in st.session_state.fits_to_show])
+    st.session_state.fits_to_show = list(set(st.session_state.fits_to_show)) # Remove duplicates
+    print([fit.name for fit in st.session_state.fits_to_show])
+
+    plotting_fits = []
+    for fit in st.session_state.fits_to_show:
+        # print(fit)
+        if fit.name not in plotting_fits:
+            plotting_fits.append(fit.name)
+            fit.plot()
+    axs.set_title("Selected Fits")
+    axs.legend()
+    left_col, mid_col, right_col = st.columns([0.2, 0.6, 0.2])
+    mid_col.pyplot(fig, width="stretch")
+
+    clear_button_state = st.button("Clear Selected Fits", key="clear_fits_button")
+    print(clear_button_state)
+    if clear_button_state:
+        st.session_state.fits_to_show = []
+        clear_button_state = False
+    

@@ -137,3 +137,7 @@ def allocation_plot(allocation_dictionary):
     plt.xticks(rotation=75)
     # plt.tight_layout()
     return allocation_fig, ax    
+
+def selective_fit_plots(fits_list):
+    for fit in fits_list:
+        fit.plot()
