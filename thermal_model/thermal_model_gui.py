@@ -34,8 +34,8 @@ file_path = os.path.dirname(abspath)
 
 def default_page_load():
     st.set_page_config("Interactive Thermal Model GUI", page_icon=":thermometer:", layout="wide")
-    HORIZONTAL_RED = f"{file_path}{os.sep}static{os.sep}blast-logo.png"
-    ICON_RED = f"{file_path}{os.sep}static{os.sep}blast-logo.png"
+    HORIZONTAL_RED = f"{file_path}{os.sep}static{os.sep}blast-logo.jpg"
+    ICON_RED = f"{file_path}{os.sep}static{os.sep}blast-logo.jpg"
     st.logo(HORIZONTAL_RED, icon_image=ICON_RED)
     
 default_page_load()
