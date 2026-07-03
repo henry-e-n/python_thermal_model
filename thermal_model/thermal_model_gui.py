@@ -276,7 +276,7 @@ with tabs[0]:
 
 
         # Button to add a new component or stage
-        if st.sidebar.button("Add") and name:
+        if st.sidebar.button("Add", key='add_comp_button') and name:
             if selected_comp_type == "Stage":
                 # Add a new stage
                 if st.session_state.stages_exist == False:
@@ -358,7 +358,8 @@ with tabs[0]:
             label="Download JSON",
             data=json.dumps(save_to_json(all_stages), indent=4),
             file_name="stages_components.json",
-            mime="application/json"
+            mime="application/json",
+            key="downloadjson"
         )
 
 
@@ -382,7 +383,7 @@ with tabs[0]:
 
     # Button to load default JSON
     
-    load_example = st.sidebar.button("Load Example Model", type="primary")
+    load_example = st.sidebar.button("Load Example Model", key="example_model")
     if load_example:
         # No model has been loaded or started - load the default model
         default_file = f"{file_path}{os.sep}templates{os.sep}BFLD400.json"
@@ -403,6 +404,7 @@ with tabs[0]:
         st.session_state.main_stage = loaded_stages[0]
         st.session_state.main_stage.stages = loaded_stages[1:]
         st.sidebar.success("JSON loaded successfully!")
+
 
     clear_button = st.sidebar.button("Clear All", type="primary")
     # with st.sidebar.popover("Clear All"):
@@ -554,12 +556,12 @@ with tabs[0]:
     button_col1, button_col2 = st.columns(2)
     
     
-    button_col1.button("Calculate Power", width="stretch", type="primary")
+    button_col1.button("Calculate Power", width="stretch", key="calc_power_button")
     if button_col1:
         all_stages, updated_cooling_data = calc_power_button_press(stage_components_dict, stage_details)
 
     optim_clicked = st.session_state.get("optimize_clicked", False)
-    button_clicked = button_col2.button("Optimize", width="stretch", type="primary")
+    button_clicked = button_col2.button("Optimize", width="stretch", key="optimize_button")
     optim_number = button_col2.slider("Optimize Points", min_value=5, max_value=100, value=10, step=5, key="optimize_slider")
     if button_clicked:
         st.session_state.optimize_clicked = True
