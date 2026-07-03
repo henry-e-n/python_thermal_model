@@ -380,16 +380,20 @@ with tabs[0]:
             stages.append(stage)
         return stages
 
-    # Button to upload JSON
-    # uploaded_file = st.sidebar.file_uploader("Upload JSON", type="json")
-    # if uploaded_file:
-    #     json_data = json.load(uploaded_file)
-    #     loaded_stages = load_from_json(json_data)
-    #     if loaded_stages:
-    #         st.session_state.main_stage = loaded_stages[0]
-    #         st.session_state.main_stage.stages = loaded_stages[1:]
-    #         st.sidebar.success("JSON loaded successfully!")
-
+    # Button to load default JSON
+    
+    load_example = st.sidebar.button("Load Example Model", type="primary")
+    if load_example:
+        # No model has been loaded or started - load the default model
+        default_file = f"{file_path}{os.sep}templates{os.sep}BFLD400.json"
+        with open(default_file, "r") as f:
+            json_data = json.load(f)
+        # json_data = json.load(default_file)
+        loaded_stages = load_from_json(json_data)
+        st.session_state.main_stage = loaded_stages[0]
+        st.session_state.main_stage.stages = loaded_stages[1:]
+        st.sidebar.success("Default model loaded successfully!")
+        st.rerun()
 
     # Button to upload JSON
     uploaded_file = st.sidebar.file_uploader("Upload JSON", type="json")
@@ -401,9 +405,22 @@ with tabs[0]:
         st.sidebar.success("JSON loaded successfully!")
 
     clear_button = st.sidebar.button("Clear All", type="primary")
+    # with st.sidebar.popover("Clear All"):
+    #     name_afterClear = st.sidebar.text_input("Name", key="name_afterClear", value="Stage 1")
+    @st.dialog("Clear All Components")
+    def clear_all_box():
+        st.markdown("Are you sure you want to clear all components and stages? This action cannot be undone.")
+        name_afterClear = st.text_input("Name", key="name_afterClear", value="Stage 1")
+        low_temp = st.number_input("Low Temperature (°K)", key="LowTemp_afterClear", value=25.0, format="%.1f")
+        high_temp = st.number_input("High Temperature (°K)", key="HighTemp_afterClear", value=270.0, format="%.1f")
+
+        st.session_state.main_stage = Stage(name_afterClear, high_temp=high_temp, low_temp=low_temp, color=get_color())
+        if st.button("Submit"):
+            st.rerun()
     
     if clear_button:
-        st.session_state.main_stage = Stage("Stage 1", color=get_color())
+        clear_all_box()
+        # st.session_state.main_stage = Stage(name_afterClear, color=get_color())
         st.sidebar.success("All components and stages cleared!")
 
     ############################################################
@@ -657,6 +674,8 @@ with tabs[3]:
                     int_fig, int_ax = plot_integral(selected_component, [st.session_state.main_stage, st.session_state.main_stage.stages])
                     left_col, mid_col, right_col = st.columns([0.2, 0.6, 0.2])
                     mid_col.pyplot(int_fig, width="stretch")
+                    st.warning(f"If plot does not update to reflect the chosen component, simply reselect the component from the dropdown above to reload the plot.")
+
                 except:
                     st.warning("Integral plot not available for this component type.")
         # Sum Var plot

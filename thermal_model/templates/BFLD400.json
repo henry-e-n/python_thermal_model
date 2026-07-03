@@ -1,0 +1,96 @@
+{
+    "components": {
+        "PTC1": {
+            "Support Legs": {
+                "Cold Stage": "PTC1",
+                "Type": "Standard",
+                "Warm Stage": "PTC1",
+                "Material": "G10_parent",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 0.055,
+                "ID (m)": 0.054,
+                "Length (m)": 0.0395,
+                "Number": 24,
+                "Providing Vapor": false,
+                "Power per Part (W)": 0.33703484728821975,
+                "Power Total (W)": 8.088836334917275
+            }
+        },
+        "PTC2": {
+            "Support Legs": {
+                "Cold Stage": "PTC2",
+                "Type": "Standard",
+                "Warm Stage": "PTC2",
+                "Material": "G10_parent",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 0.055,
+                "ID (m)": 0.054,
+                "Length (m)": 0.054,
+                "Number": 24,
+                "Providing Vapor": false,
+                "Power per Part (W)": 0.011267258276798368,
+                "Power Total (W)": 0.27041419864316085
+            }
+        },
+        "Still": {
+            "Support Legs": {
+                "Cold Stage": "Still",
+                "Type": "Standard",
+                "Warm Stage": "Still",
+                "Material": "CFRP",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 0.008,
+                "ID (m)": 0.0075,
+                "Length (m)": 0.031,
+                "Number": 24,
+                "Providing Vapor": false,
+                "Power per Part (W)": 9.8580017755058e-06,
+                "Power Total (W)": 0.00023659204261213917
+            }
+        },
+        "MXC": {
+            "Support Legs": {
+                "Cold Stage": "MXC",
+                "Type": "Standard",
+                "Warm Stage": "MXC",
+                "Material": "CFRP",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 0.003,
+                "ID (m)": 0.0025,
+                "Length (m)": 0.0188,
+                "Number": 16,
+                "Providing Vapor": false,
+                "Power per Part (W)": 3.9983697001198915e-07,
+                "Power Total (W)": 6.397391520191826e-06
+            }
+        }
+    },
+    "stage_details": {
+        "PTC1": {
+            "lowT": 40.0,
+            "highT": 300.0
+        },
+        "PTC2": {
+            "lowT": 4.0,
+            "highT": 40.0
+        },
+        "Still": {
+            "lowT": 1.0,
+            "highT": 4.0
+        },
+        "MXC": {
+            "lowT": 0.1,
+            "highT": 1.0
+        }
+    },
+    "total_power": {
+        "PTC1": 8.088836334917275,
+        "PTC2": 0.27041419864316085,
+        "Still": 0.00023659204261213917,
+        "MXC": 6.397391520191826e-06
+    }
+}
