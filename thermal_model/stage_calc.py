@@ -78,9 +78,9 @@ def calculate_power_function(details, stage_temps, A_L = False):
                 log_to_file(f"ERROR: Interpolation range for {mat} is {valid_range}, but requested range is {lowT} to {highT}. Using default material fit instead.")
                 fits_obj = get_material_fits(mat)
                 first_fit = fits_obj[0]
-                if lowT < first_fit.valid_range[0] or highT > first_fit.valid_range[1]:
-                    print(f"Warning: Fit range for {mat} is {first_fit.valid_range}, but requested range is {lowT} to {highT}. Calculated power may not be accurate.")
-                    log_to_file(f"Warning: Fit range for {mat} is {first_fit.valid_range}, but requested range is {lowT} to {highT}. Calculated power may not be accurate.")
+                if lowT < first_fit.range[0] or highT > first_fit.range[1]:
+                    print(f"Warning: Fit range for {mat} is {first_fit.range}, but requested range is {lowT} to {highT}. Calculated power may not be accurate.")
+                    log_to_file(f"Warning: Fit range for {mat} is {first_fit.range}, but requested range is {lowT} to {highT}. Calculated power may not be accurate.")
                 ConIntQuad = first_fit.tc_integral(lowT*u.K, highT*u.K)[0].value
             else:
                 ConIntQuad = get_interpolation_integral(lowT, highT, mat)
