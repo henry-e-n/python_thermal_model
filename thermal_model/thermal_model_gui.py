@@ -795,6 +795,7 @@ with tabs[4]:
     
 with tabs[6]:
     st.header("Logs")
+    st.markdown("This section displays the logs generated during the execution of the application. It can be useful for debugging and tracking the application's behavior.")
     try:
         with open(log_file_path, 'r') as log_file:
             log_contents = log_file.read()
