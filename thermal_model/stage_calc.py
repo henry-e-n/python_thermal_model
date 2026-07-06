@@ -7,6 +7,7 @@ import sys, os, csv, json
 import matplotlib.pyplot as plt
 import pickle
 from tqdm import tqdm
+import time as time
 # from global_var import cmr_path, path_to_mat_lib
 from astropy import units as u
 
@@ -25,6 +26,8 @@ def read_markdown_file(file_path):
         return file.read()
 
 def log_to_file(message):
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    message = f"[{timestamp}] {message}"
     with open(log_file_path, 'a') as log_file:
         log_file.write(f"{message}\n")
     return
