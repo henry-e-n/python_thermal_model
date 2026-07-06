@@ -71,7 +71,7 @@ def plot_integral(selected_component, stages):
     ax.semilogy()
     ax.semilogx()
     ax.legend()
-    ax.set_title(f"Plot of  {selected_component.name}")
+    ax.set_title(f"Plot of : {selected_component.name}")
     ax.set_xlabel("T [K]")
     ax.set_ylabel("Thermal Conductivity : k [W/m/K]")
     return fig, ax

@@ -27,11 +27,11 @@ abspath = os.path.abspath(__file__)
 file_path = os.path.dirname(abspath)
 
 mpl.style.use(f"{file_path}{os.sep}static{os.sep}CustomMono.mplstyle")
-# log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
-# if not os.path.exists(log_file_path):
-#     with open(log_file_path, 'w') as log_file:
-#         log_file.write("Thermal Model Log File\n")
-#         log_file.write("======================\n\n")
+log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
+if not os.path.exists(log_file_path):
+    with open(log_file_path, 'w') as log_file:
+        log_file.write("Thermal Model Log File\n")
+        log_file.write("======================\n\n")
 
 def default_page_load():
     st.set_page_config("Interactive Thermal Model GUI", page_icon=":thermometer:", layout="wide")
@@ -64,6 +64,10 @@ def get_dark_color():
 # Initialize stages and components
 if 'main_stage' not in st.session_state:
     st.session_state.main_stage = [] # Stage("Stage 1", high_temp=270.0, low_temp=60.0, color=get_color())
+    # Also reset the log file
+    with open(log_file_path, 'w') as log_file:
+        log_file.write("Thermal Model Log File\n")
+        log_file.write("======================\n\n")
 
 # st.write("Session State:", st.session_state)
 # Initialize session state
@@ -92,7 +96,7 @@ title_area, logo_area = st.columns(2)
 title_area.title("Interactive Thermal Model GUI")
 logo_area.image(f"{file_path}{os.sep}static{os.sep}blast-logo.jpg", width=200)  # Display the logo in the main body
 
-tabs = st.tabs(["Component Modeling", "Result Tables", "Allocation", "Plots", "Library", "About"])
+tabs = st.tabs(["Component Modeling", "Result Tables", "Allocation", "Plots", "Library", "About", "Logs"])
 
 # Main Page Content
 with tabs[0]:
@@ -789,3 +793,11 @@ with tabs[4]:
         st.session_state.fits_to_show = []
         clear_button_state = False
     
+with tabs[6]:
+    st.header("Logs")
+    try:
+        with open(log_file_path, 'r') as log_file:
+            log_contents = log_file.read()
+            st.text_area("Log Contents", value=log_contents, height=400)
+    except FileNotFoundError:
+        st.warning("Log file not found. No logs to display.")
