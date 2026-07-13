@@ -436,16 +436,20 @@ with tabs[0]:
 
     # Function to display a stage with components
     def display_stage(stage):
-        with st.container(
-            key=f"{stage.name}_container",
-            css_styles="""
-                {
+        st.html("""
+            <style>
+                .%s_container {
+                    
                     background-color: %s;
                     border: 0px solid %s;
                     border-radius: 0.5rem;
                     padding: 1em 1em 2em 1em; /* Top, Right, Bottom, Left */
                 }
-                """ % (get_color(), get_dark_color()),
+            </style>
+        """) % (stage.name, get_color(), get_dark_color())
+
+        with st.container(
+            key=f"{stage.name}_container",
         ): 
             if stage.name not in st.session_state.editing_stage_properties:
                 st.session_state.editing_stage_properties[stage.name] = False
