@@ -436,17 +436,17 @@ with tabs[0]:
 
     # Function to display a stage with components
     def display_stage(stage):
-        st.html("""
-            <style>
-                .%s_container {
+        # st.html("""
+        #     <style>
+        #         .%s_container {
                     
-                    background-color: %s;
-                    border: 0px solid %s;
-                    border-radius: 0.5rem;
-                    padding: 1em 1em 2em 1em; /* Top, Right, Bottom, Left */
-                }
-            </style>
-        """) % (stage.name, get_color(), get_dark_color())
+        #             background-color: %s;
+        #             border: 0px solid %s;
+        #             border-radius: 0.5rem;
+        #             padding: 1em 1em 2em 1em; /* Top, Right, Bottom, Left */
+        #         }
+        #     </style>
+        # """) % (stage.name, get_color(), get_dark_color())
 
         with st.container(
             key=f"{stage.name}_container",
