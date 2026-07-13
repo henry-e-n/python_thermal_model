@@ -15,8 +15,6 @@ import plotly.express as px
 import logging
 import matplotlib as mpl
 
-# from streamlit_extras.stylable_container import stylable_container
-
 # from global_var import cmr_path, path_to_mat_lib
 from plotting import *
 import thermal_conductivity as tc
@@ -436,21 +434,10 @@ with tabs[0]:
 
     # Function to display a stage with components
     def display_stage(stage):
-        # st.html("""
-        #     <style>
-        #         .%s_container {
-                    
-        #             background-color: %s;
-        #             border: 0px solid %s;
-        #             border-radius: 0.5rem;
-        #             padding: 1em 1em 2em 1em; /* Top, Right, Bottom, Left */
-        #         }
-        #     </style>
-        # """) % (stage.name, get_color(), get_dark_color())
+        safe_name = stage.name.replace(' ', '_').replace('-', '_').replace('.', '_')
 
-        with st.container(
-            key=f"{stage.name}_container",
-        ): 
+        with st.container(key=f"{stage.name}_container"):
+
             if stage.name not in st.session_state.editing_stage_properties:
                 st.session_state.editing_stage_properties[stage.name] = False
             with st.expander(f"{stage.name}", expanded=False):
@@ -558,7 +545,7 @@ with tabs[0]:
             # updated_cooling_data = {"NAME" : [0,0]}
         else:
             updated_cooling_data = {"NAME" : [0,0]}
-            st.warning("Sum variance can only be calculated with a complete system. Please add a 4K - LHe stage.")
+            st.warning("Sum variance is only meant to be calculated with a complete liquid cryogen system. Please add a 4K - LHe stage.")
         return all_stages, updated_cooling_data
     # Function buttons
     button_col1, button_col2 = st.columns(2)
