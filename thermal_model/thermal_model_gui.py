@@ -1,4 +1,5 @@
 import streamlit as st
+# import streamlit_analytics
 from components.component import Component
 from stages.stage import Stage
 import random, os, sys
@@ -18,6 +19,9 @@ import matplotlib as mpl
 # from global_var import cmr_path, path_to_mat_lib
 from plotting import *
 import thermal_conductivity as tc
+
+from analytics.analytics import start_tracking, stop_tracking, reset_counts, counts
+start_tracking()
 
 # Define Paths
 
@@ -88,6 +92,16 @@ else:
 # Include custom CSS
 with open(f"{file_path}{os.sep}static{os.sep}styles.css") as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
+
+from analytics.googleanalytics import record_visit
+
+# Guard: only count once per browser session
+if "visit_recorded" not in st.session_state:
+    record_visit()
+    st.session_state["visit_recorded"] = True
+
+
 
 # Streamlit app
 title_area, logo_area = st.columns(2)
@@ -793,3 +807,5 @@ with tabs[6]:
             st.text_area("Log Contents", value=log_contents, height=400)
     except FileNotFoundError:
         st.warning("Log file not found. No logs to display.")
+
+stop_tracking()

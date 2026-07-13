@@ -1,0 +1,1 @@
+Taken mostly from the `streamlit-analytics` github package by Johannes Rieke.
