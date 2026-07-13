@@ -15,7 +15,7 @@ import plotly.express as px
 import logging
 import matplotlib as mpl
 
-from streamlit_extras.stylable_container import stylable_container
+# from streamlit_extras.stylable_container import stylable_container
 
 # from global_var import cmr_path, path_to_mat_lib
 from plotting import *
@@ -413,7 +413,7 @@ with tabs[0]:
 
     # Function to display a stage with components
     def display_stage(stage):
-        with stylable_container(
+        with st.container(
             key=f"{stage.name}_container",
             css_styles="""
                 {
