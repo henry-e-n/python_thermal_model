@@ -1,4 +1,9 @@
 /* styles.css */
+:root {
+    --action-button-color: #e9910c;
+    --action-button-hover-color: #cf7f08;
+}
+
 .stage {
     background-color: var(--stage-color);
     padding: 10px;
@@ -40,3 +45,46 @@
     font-size:1.5rem;
     }
 
+.st-key-example_model button {
+    background-color: #4685ce !important;
+    color: white !important;
+    border: none !important;
+}
+.st-key-example_model button:hover {
+    background-color: #0d335f !important;
+}
+
+
+.st-key-add_comp_button button {
+    background-color: #4CAF50 !important;
+    color: white !important;
+    border: none !important;
+}
+.st-key-add_comp_button button:hover {
+    background-color: #124e14 !important;
+}
+
+
+
+.st-key-downloadjson button {
+    background-color: var(--action-button-color) !important;
+    color: white !important;
+    border: none !important;
+}
+.st-key-downloadjson button:hover {
+    background-color: var(--action-button-hover-color) !important;
+}
+
+
+
+.st-key-calc_power_button button,
+.st-key-optimize_button button {
+    background-color: var(--action-button-color) !important;
+    color: white !important;
+    border: none !important;
+}
+
+.st-key-calc_power_button button:hover,
+.st-key-optimize_button button:hover {
+    background-color: var(--action-button-hover-color) !important;
+}

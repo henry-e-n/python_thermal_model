@@ -7,6 +7,7 @@ import sys, os, csv, json
 import matplotlib.pyplot as plt
 import pickle
 from tqdm import tqdm
+import time as time
 # from global_var import cmr_path, path_to_mat_lib
 from astropy import units as u
 
@@ -18,15 +19,17 @@ from astropy import units as u
 from thermal_conductivity.tc_utils import *
 from thermal_conductivity.fit_types import *
 
-# log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
+log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
 
 def read_markdown_file(file_path):
     with open(file_path, "r") as file:
         return file.read()
 
 def log_to_file(message):
-    # with open(log_file_path, 'a') as log_file:
-    #     log_file.write(f"{message}\n")
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    message = f"[{timestamp}] {message}"
+    with open(log_file_path, 'a') as log_file:
+        log_file.write(f"{message}\n")
     return
 
 def select_stage(name, stages):
@@ -75,14 +78,18 @@ def calculate_power_function(details, stage_temps, A_L = False):
         if interp_exists:
             if lowT < valid_range[0] or highT > valid_range[1]:
                 print(f"ERROR: Interpolation range for {mat} is {valid_range}, but requested range is {lowT} to {highT}. Using default material fit instead.")
+                log_to_file(f"ERROR: Interpolation range for {mat} is {valid_range}, but requested range is {lowT} to {highT}. Using default material fit instead.")
                 fits_obj = get_material_fits(mat)
                 first_fit = fits_obj[0]
+                if lowT < first_fit.range[0] or highT > first_fit.range[1]:
+                    print(f"Warning: Fit range for {mat} is {first_fit.range}, but requested range is {lowT} to {highT}. Calculated power may not be accurate.")
+                    log_to_file(f"Warning: Fit range for {mat} is {first_fit.range}, but requested range is {lowT} to {highT}. Calculated power may not be accurate.")
                 ConIntQuad = first_fit.tc_integral(lowT*u.K, highT*u.K)[0].value
             else:
                 ConIntQuad = get_interpolation_integral(lowT, highT, mat)
         else:
             print(f"WARNING: No interpolation function found for {mat}. Using default material fit instead.")
-            # log_to_file(f"WARNING: No interpolation function found for {mat}. Using default material fit instead.")
+            log_to_file(f"WARNING: No interpolation function found for {mat}. Using default material fit instead.")
     else:
         # print("Using fit for material...", mat, details["Fit Choice"])
         fit_obj = get_fit_by_name(mat, details["Fit Choice"])

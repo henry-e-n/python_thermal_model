@@ -13,7 +13,7 @@ ___
 
 ## Getting Started:
 
-This section will help guide you through how to make your first thermal model. 
+This section will help guide you through how to make your first thermal model. You can also click the `Load Example Model` button to explore a basic example of a Bluefors LD400 system model (please note the example is purely meant as a tutorial of the thermal model tool and should not be blindly used as a reference for a dilution refrigeration system performance). 
 
 ### Adding a Stage
 Each `system` must begin with a `stage`. A stage in this context is defined as a group of components that share a temperature level. Each stage has a `Low Temperature` and a `High Temperature`. The low temperature is generally the ideal temperature of that set of components, the high temperature defines the temperature of the environment the stage is launched from.

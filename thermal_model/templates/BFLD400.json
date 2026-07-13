@@ -1,0 +1,293 @@
+{
+    "components": {
+        "PTC1": {
+            "Support Legs": {
+                "Cold Stage": "PTC1",
+                "Type": "Standard",
+                "Warm Stage": "PTC1",
+                "Material": "G10_parent",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 0.055,
+                "ID (m)": 0.054,
+                "Length (m)": 0.0395,
+                "Number": 24,
+                "Providing Vapor": false,
+                "Power per Part (W)": 0.33703484728821975,
+                "Power Total (W)": 8.088836334917275
+            },
+            "Housekeeping Cable": {
+                "Cold Stage": "PTC1",
+                "Type": "Standard",
+                "Warm Stage": "PTC1",
+                "Material": "Manganin",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 0.00011176,
+                "ID (m)": 0.0,
+                "Length (m)": 0.1,
+                "Number": 200,
+                "Providing Vapor": false,
+                "Power per Part (W)": 0.0004590359393727794,
+                "Power Total (W)": 0.09180718787455587
+            },
+            "Readout Manganin Cables": {
+                "Cold Stage": "PTC1",
+                "Type": "Standard",
+                "Warm Stage": "PTC1",
+                "Material": "Manganin",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 0.000152,
+                "ID (m)": 0.0,
+                "Length (m)": 0.15,
+                "Number": 408,
+                "Providing Vapor": false,
+                "Power per Part (W)": 0.000566069583656608,
+                "Power Total (W)": 0.23095639013189603
+            },
+            "Readout Kapton Cables": {
+                "Cold Stage": "PTC1",
+                "Type": "Standard",
+                "Warm Stage": "PTC1",
+                "Material": "Kapton",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 3e-05,
+                "ID (m)": 0.0,
+                "Length (m)": 0.15,
+                "Number": 408,
+                "Providing Vapor": false,
+                "Power per Part (W)": 3.3775258995367645e-07,
+                "Power Total (W)": 0.0001378030567011
+            },
+            "Radiation": {
+                "Cold Stage": "PTC1",
+                "Type": "Power per Part",
+                "Power per Part (W)": 5.97,
+                "Number": 1,
+                "Providing Vapor": false,
+                "Power Total (W)": 5.97
+            }
+        },
+        "PTC2": {
+            "Support Legs": {
+                "Cold Stage": "PTC2",
+                "Type": "Standard",
+                "Warm Stage": "PTC2",
+                "Material": "G10_parent",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 0.055,
+                "ID (m)": 0.054,
+                "Length (m)": 0.054,
+                "Number": 24,
+                "Providing Vapor": false,
+                "Power per Part (W)": 0.011267258276798368,
+                "Power Total (W)": 0.27041419864316085
+            },
+            "Housekeeping Cable": {
+                "Cold Stage": "PTC2",
+                "Type": "Standard",
+                "Warm Stage": "PTC2",
+                "Material": "Manganin",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 0.00011176,
+                "ID (m)": 0.0,
+                "Length (m)": 0.1,
+                "Number": 200,
+                "Providing Vapor": false,
+                "Power per Part (W)": 1.4523535663020511e-05,
+                "Power Total (W)": 0.002904707132604102
+            },
+            "Readout Manganin Cables": {
+                "Cold Stage": "PTC2",
+                "Type": "Standard",
+                "Warm Stage": "PTC2",
+                "Material": "Manganin",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 0.000101,
+                "ID (m)": 0.0,
+                "Length (m)": 0.15,
+                "Number": 408,
+                "Providing Vapor": false,
+                "Power per Part (W)": 7.907715895067877e-06,
+                "Power Total (W)": 0.003226348085187694
+            },
+            "Readout Kapton Cables": {
+                "Cold Stage": "PTC2",
+                "Type": "Standard",
+                "Warm Stage": "PTC2",
+                "Material": "Kapton",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 3e-05,
+                "ID (m)": 0.0,
+                "Length (m)": 0.15,
+                "Number": 408,
+                "Providing Vapor": false,
+                "Power per Part (W)": 1.1044987855612172e-08,
+                "Power Total (W)": 4.506355045089766e-06
+            },
+            "Radiation": {
+                "Cold Stage": "PTC2",
+                "Type": "Power per Part",
+                "Power per Part (W)": 0.0005,
+                "Number": 1,
+                "Providing Vapor": false,
+                "Power Total (W)": 0.0005
+            }
+        },
+        "Still": {
+            "Support Legs": {
+                "Cold Stage": "Still",
+                "Type": "Standard",
+                "Warm Stage": "Still",
+                "Material": "CFRP",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 0.008,
+                "ID (m)": 0.0075,
+                "Length (m)": 0.031,
+                "Number": 24,
+                "Providing Vapor": false,
+                "Power per Part (W)": 9.8580017755058e-06,
+                "Power Total (W)": 0.00023659204261213917
+            },
+            "Housekeeping Cable": {
+                "Cold Stage": "Still",
+                "Type": "Standard",
+                "Warm Stage": "Still",
+                "Material": "Manganin",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 0.00011176,
+                "ID (m)": 0.0,
+                "Length (m)": 0.05,
+                "Number": 48,
+                "Providing Vapor": false,
+                "Power per Part (W)": 1.6708894396451e-07,
+                "Power Total (W)": 8.02026931029648e-06
+            },
+            "Readout Kapton Cables": {
+                "Cold Stage": "Still",
+                "Type": "Standard",
+                "Warm Stage": "Still",
+                "Material": "Kapton",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 3e-05,
+                "ID (m)": 0.0,
+                "Length (m)": 0.1,
+                "Number": 408,
+                "Providing Vapor": false,
+                "Power per Part (W)": 1.487068442022555e-10,
+                "Power Total (W)": 6.067239243452025e-08
+            },
+            "Readout NbTi Cables": {
+                "Cold Stage": "Still",
+                "Type": "Standard",
+                "Warm Stage": "Still",
+                "Material": "NbTi",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 0.000152,
+                "ID (m)": 0.0,
+                "Length (m)": 0.1,
+                "Number": 408,
+                "Providing Vapor": false,
+                "Power per Part (W)": 3.715672161303408e-08,
+                "Power Total (W)": 1.5159942418117904e-05
+            },
+            "Radiation": {
+                "Cold Stage": "Still",
+                "Type": "Power per Part",
+                "Power per Part (W)": 3.62e-08,
+                "Number": 1,
+                "Providing Vapor": false,
+                "Power Total (W)": 3.62e-08
+            }
+        },
+        "MXC": {
+            "Support Legs": {
+                "Cold Stage": "MXC",
+                "Type": "Standard",
+                "Warm Stage": "MXC",
+                "Material": "CFRP",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 0.003,
+                "ID (m)": 0.0025,
+                "Length (m)": 0.0188,
+                "Number": 16,
+                "Providing Vapor": false,
+                "Power per Part (W)": 3.9983697001198915e-07,
+                "Power Total (W)": 6.397391520191826e-06
+            },
+            "Housekeeping Cable": {
+                "Cold Stage": "MXC",
+                "Type": "Standard",
+                "Warm Stage": "MXC",
+                "Material": "Manganin",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 0.00011176,
+                "ID (m)": 0.0,
+                "Length (m)": 0.1,
+                "Number": 48,
+                "Providing Vapor": false,
+                "Power per Part (W)": 3.603040933710884e-09,
+                "Power Total (W)": 1.7294596481812244e-07
+            },
+            "Readout NbTi Cables": {
+                "Cold Stage": "MXC",
+                "Type": "Standard",
+                "Warm Stage": "MXC",
+                "Material": "NbTi",
+                "Interpolate": true,
+                "Fit Choice": null,
+                "OD (m)": 0.000152,
+                "ID (m)": 0.0,
+                "Length (m)": 0.1,
+                "Number": 408,
+                "Providing Vapor": false,
+                "Power per Part (W)": 1.6315006515768784e-09,
+                "Power Total (W)": 6.656522658433663e-07
+            },
+            "Radiation": {
+                "Cold Stage": "MXC",
+                "Type": "Power per Part",
+                "Power per Part (W)": 7.39e-10,
+                "Number": 1,
+                "Providing Vapor": false,
+                "Power Total (W)": 7.39e-10
+            }
+        }
+    },
+    "stage_details": {
+        "PTC1": {
+            "lowT": 40.0,
+            "highT": 300.0
+        },
+        "PTC2": {
+            "lowT": 4.0,
+            "highT": 40.0
+        },
+        "Still": {
+            "lowT": 1.0,
+            "highT": 4.0
+        },
+        "MXC": {
+            "lowT": 0.1,
+            "highT": 1.0
+        }
+    },
+    "total_power": {
+        "PTC1": Infinity,
+        "PTC2": 5.157291601553039e+152,
+        "Still": 0.0002598691680010252,
+        "MXC": 1.6233383907448286e+272
+    }
+}

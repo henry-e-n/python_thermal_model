@@ -27,11 +27,11 @@ abspath = os.path.abspath(__file__)
 file_path = os.path.dirname(abspath)
 
 mpl.style.use(f"{file_path}{os.sep}static{os.sep}CustomMono.mplstyle")
-# log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
-# if not os.path.exists(log_file_path):
-#     with open(log_file_path, 'w') as log_file:
-#         log_file.write("Thermal Model Log File\n")
-#         log_file.write("======================\n\n")
+log_file_path = os.path.join(os.path.dirname(__file__), 'thermal_model.log')
+if not os.path.exists(log_file_path):
+    with open(log_file_path, 'w') as log_file:
+        log_file.write("Thermal Model Log File\n")
+        log_file.write("======================\n\n")
 
 def default_page_load():
     st.set_page_config("Interactive Thermal Model GUI", page_icon=":thermometer:", layout="wide")
@@ -64,6 +64,10 @@ def get_dark_color():
 # Initialize stages and components
 if 'main_stage' not in st.session_state:
     st.session_state.main_stage = [] # Stage("Stage 1", high_temp=270.0, low_temp=60.0, color=get_color())
+    # Also reset the log file
+    with open(log_file_path, 'w') as log_file:
+        log_file.write("Thermal Model Log File\n")
+        log_file.write("======================\n\n")
 
 # st.write("Session State:", st.session_state)
 # Initialize session state
@@ -92,7 +96,7 @@ title_area, logo_area = st.columns(2)
 title_area.title("Interactive Thermal Model GUI")
 logo_area.image(f"{file_path}{os.sep}static{os.sep}blast-logo.jpg", width=200)  # Display the logo in the main body
 
-tabs = st.tabs(["Component Modeling", "Result Tables", "Allocation", "Plots", "Library", "About"])
+tabs = st.tabs(["Component Modeling", "Result Tables", "Allocation", "Plots", "Library", "About", "Logs"])
 
 # Main Page Content
 with tabs[0]:
@@ -276,7 +280,7 @@ with tabs[0]:
 
 
         # Button to add a new component or stage
-        if st.sidebar.button("Add") and name:
+        if st.sidebar.button("Add", key='add_comp_button') and name:
             if selected_comp_type == "Stage":
                 # Add a new stage
                 if st.session_state.stages_exist == False:
@@ -358,7 +362,8 @@ with tabs[0]:
             label="Download JSON",
             data=json.dumps(save_to_json(all_stages), indent=4),
             file_name="stages_components.json",
-            mime="application/json"
+            mime="application/json",
+            key="downloadjson"
         )
 
 
@@ -380,16 +385,20 @@ with tabs[0]:
             stages.append(stage)
         return stages
 
-    # Button to upload JSON
-    # uploaded_file = st.sidebar.file_uploader("Upload JSON", type="json")
-    # if uploaded_file:
-    #     json_data = json.load(uploaded_file)
-    #     loaded_stages = load_from_json(json_data)
-    #     if loaded_stages:
-    #         st.session_state.main_stage = loaded_stages[0]
-    #         st.session_state.main_stage.stages = loaded_stages[1:]
-    #         st.sidebar.success("JSON loaded successfully!")
-
+    # Button to load default JSON
+    
+    load_example = st.sidebar.button("Load Example Model", key="example_model")
+    if load_example:
+        # No model has been loaded or started - load the default model
+        default_file = f"{file_path}{os.sep}templates{os.sep}BFLD400.json"
+        with open(default_file, "r") as f:
+            json_data = json.load(f)
+        # json_data = json.load(default_file)
+        loaded_stages = load_from_json(json_data)
+        st.session_state.main_stage = loaded_stages[0]
+        st.session_state.main_stage.stages = loaded_stages[1:]
+        st.sidebar.success("Default model loaded successfully!")
+        st.rerun()
 
     # Button to upload JSON
     uploaded_file = st.sidebar.file_uploader("Upload JSON", type="json")
@@ -400,10 +409,24 @@ with tabs[0]:
         st.session_state.main_stage.stages = loaded_stages[1:]
         st.sidebar.success("JSON loaded successfully!")
 
+
     clear_button = st.sidebar.button("Clear All", type="primary")
+    # with st.sidebar.popover("Clear All"):
+    #     name_afterClear = st.sidebar.text_input("Name", key="name_afterClear", value="Stage 1")
+    @st.dialog("Clear All Components")
+    def clear_all_box():
+        st.markdown("Are you sure you want to clear all components and stages? This action cannot be undone.")
+        name_afterClear = st.text_input("Name", key="name_afterClear", value="Stage 1")
+        low_temp = st.number_input("Low Temperature (°K)", key="LowTemp_afterClear", value=25.0, format="%.1f")
+        high_temp = st.number_input("High Temperature (°K)", key="HighTemp_afterClear", value=270.0, format="%.1f")
+
+        st.session_state.main_stage = Stage(name_afterClear, high_temp=high_temp, low_temp=low_temp, color=get_color())
+        if st.button("Submit"):
+            st.rerun()
     
     if clear_button:
-        st.session_state.main_stage = Stage("Stage 1", color=get_color())
+        clear_all_box()
+        # st.session_state.main_stage = Stage(name_afterClear, color=get_color())
         st.sidebar.success("All components and stages cleared!")
 
     ############################################################
@@ -537,12 +560,12 @@ with tabs[0]:
     button_col1, button_col2 = st.columns(2)
     
     
-    button_col1.button("Calculate Power", width="stretch", type="primary")
+    button_col1.button("Calculate Power", width="stretch", key="calc_power_button")
     if button_col1:
         all_stages, updated_cooling_data = calc_power_button_press(stage_components_dict, stage_details)
 
     optim_clicked = st.session_state.get("optimize_clicked", False)
-    button_clicked = button_col2.button("Optimize", width="stretch", type="primary")
+    button_clicked = button_col2.button("Optimize", width="stretch", key="optimize_button")
     optim_number = button_col2.slider("Optimize Points", min_value=5, max_value=100, value=10, step=5, key="optimize_slider")
     if button_clicked:
         st.session_state.optimize_clicked = True
@@ -657,6 +680,8 @@ with tabs[3]:
                     int_fig, int_ax = plot_integral(selected_component, [st.session_state.main_stage, st.session_state.main_stage.stages])
                     left_col, mid_col, right_col = st.columns([0.2, 0.6, 0.2])
                     mid_col.pyplot(int_fig, width="stretch")
+                    st.warning(f"If plot does not update to reflect the chosen component, simply reselect the component from the dropdown above to reload the plot.")
+
                 except:
                     st.warning("Integral plot not available for this component type.")
         # Sum Var plot
@@ -688,7 +713,7 @@ with tabs[3]:
             plt.savefig(f"{file_path}{os.sep}Screenshots{os.sep}heatmap.png", dpi=600, bbox_inches='tight')
             mid_col.pyplot(fig, width="stretch")
         except Exception as e:
-            log_to_file(f"Error {e} : Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
+            # log_to_file(f"Error {e} : Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
             st.warning(f"Error {e} Optimization must be run to display the heatmap. Please click the 'Optimize' button on the main page.")
 
 with tabs[5]:
@@ -768,3 +793,12 @@ with tabs[4]:
         st.session_state.fits_to_show = []
         clear_button_state = False
     
+with tabs[6]:
+    st.header("Logs")
+    st.markdown("This section displays the logs generated during the execution of the application. It can be useful for debugging and tracking the application's behavior.")
+    try:
+        with open(log_file_path, 'r') as log_file:
+            log_contents = log_file.read()
+            st.text_area("Log Contents", value=log_contents, height=400)
+    except FileNotFoundError:
+        st.warning("Log file not found. No logs to display.")
